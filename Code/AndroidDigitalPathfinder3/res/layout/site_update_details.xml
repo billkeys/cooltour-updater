@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout android:id="@+id/TableLayout01" 
+	android:layout_width="fill_parent" 
+	android:layout_height="fill_parent" 
+	xmlns:android="http://schemas.android.com/apk/res/android">
+<TableRow android:id="@+id/SiteUpdateHeader" 
+	android:layout_width="wrap_content" 
+	android:layout_height="wrap_content">
+	<TextView android:id="@+id/SiteName" 
+		android:layout_width="wrap_content" 
+		android:layout_height="wrap_content">
+	</TextView>	
+</TableRow>
+<TableRow android:id="@+id/SiteUpdateDetails" 
+	android:layout_width="wrap_content" 
+	android:layout_height="wrap_content">
+	<TextView android:id="@+id/SiteUpdateVersion" 
+		android:layout_width="wrap_content" 
+		android:layout_height="wrap_content">
+	</TextView>
+	<TextView android:id="@+id/SiteUpdateSize" 
+		android:layout_width="wrap_content" 
+		android:layout_height="wrap_content">
+	</TextView>	
+		
+</TableRow>
+
+
+</TableLayout>

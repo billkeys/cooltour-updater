@@ -5,6 +5,8 @@ import geoplicity.cooltour.ui.R;
 
 import java.util.ArrayList;
 
+import org.geoplicity.mobile.util.Logger;
+
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,39 +14,41 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-public class SiteListAdapter<T> extends ArrayAdapter<T> {
+/**
+ * List Adapter for SiteData objects
+ * @author Brendon Drew (b.j.drew@gmail.com)
+ *
+ * @param <T>
+ */
+public class SiteListAdapter<T> extends ArrayAdapter<SiteData> {
 
         private ArrayList<SiteData> items;
         private Context c;
 
         public SiteListAdapter(Context context, int textViewResourceId, ArrayList<SiteData> items) {
-                super(context, textViewResourceId);
+                super(context, textViewResourceId, items);
                 this.items = items;
                 this.c = context;
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-                //View v = convertView;
-                LinearLayout rowLayout = null;
-                if (convertView == null) {
-                    rowLayout = (LinearLayout)LayoutInflater.from(c).inflate
-                    (R.layout.site_list_row, parent, false);
-                    //TextView tv = (TextView)rowLayout.findViewById(R.id.txtName);
-//                	LayoutInflater vi = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-//                    v = vi.inflate(R.layout.site_list_row, null);
+        	//Logger.log(Logger.DEBUG, "SiteListAdapter getView()");
+        	View v = convertView;
+                if (v == null) {
+                	LayoutInflater vi = (LayoutInflater)c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    v = vi.inflate(R.layout.site_list_row, null);
                 }
-                SiteData o = items.get(position);
-                if (o != null) {
-                        TextView tt = (TextView) rowLayout.findViewById(R.id.site_name);
-                        TextView bt = (TextView) rowLayout.findViewById(R.id.site_status);
+                SiteData site = items.get(position);
+                if (site != null) {
+                        TextView tt = (TextView) v.findViewById(R.id.site_name);
+                        TextView bt = (TextView) v.findViewById(R.id.site_status);
                         if (tt != null) {
-                              tt.setText("Name: "+o.getName());                            }
+                              tt.setText("Name: "+site.getName());                            }
                         if(bt != null){
-                              bt.setText("Version: "+ o.getVersion());
+                              bt.setText("Version: "+ site.getVersion());
                         }
                 }
-                return rowLayout;
+                return v;
         }
 }

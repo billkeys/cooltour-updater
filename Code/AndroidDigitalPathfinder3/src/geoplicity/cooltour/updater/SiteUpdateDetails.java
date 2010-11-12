@@ -1,6 +1,14 @@
 package geoplicity.cooltour.updater;
 
+import org.geoplicity.mobile.util.Logger;
+
+import geoplicity.cooltour.sites.SiteData;
+import geoplicity.cooltour.ui.R;
+import geoplicity.cooltour.util.Constants;
 import android.app.Activity;
+import android.os.Bundle;
+import android.widget.TextView;
+
 /**
  * This activity will act as a controller for managing a site update and 
  * will be invoked by a user selecting a site from the site list.
@@ -19,5 +27,24 @@ import android.app.Activity;
  *
  */
 public class SiteUpdateDetails extends Activity {
+	protected void onCreate(Bundle savedInstanceState){
+        super.onCreate(savedInstanceState);
+        Logger.log(Logger.DEBUG, "SiteUpdateDetails onCreate()");
+        SiteData selectedSite;
+        if (savedInstanceState != null && savedInstanceState.get(Constants.INTENT_EXTRA_SITE_UPDATE) != null) {
+        	selectedSite = (SiteData) savedInstanceState.get(Constants.INTENT_EXTRA_SITE_UPDATE);
+        }
+        else {
+        	selectedSite = new SiteData();
+        	selectedSite.setName("Unknown");
+        }
+        //setContentView(R.layout.site_update_details);
+        setContentView(R.layout.site_update_details);
+        
+        TextView name = (TextView) findViewById(R.id.SiteName);
+        name.setText(selectedSite.getName());
+        TextView version = (TextView) findViewById(R.id.SiteUpdateVersion);
+        version.setText(selectedSite.getVersion());
 
+    }
 }

@@ -25,7 +25,21 @@
         	</intent-filter>
         </activity>
        
-    </application>
-    <uses-sdk android:minSdkVersion="5" />
+	    <activity android:name="geoplicity.cooltour.updater.SiteList" android:label="@string/updater">
+			<intent-filter>
+				<action android:name="geoplicity.cooltour.LAUNCH_SITE_UPDATER"></action>
+				<category android:name="android.intent.category.DEFAULT"></category>
+		</intent-filter>
+		</activity>
+	
+		<activity android:name="geoplicity.cooltour.updater.SiteUpdateDetails" android:label="@string/updater">
+			<intent-filter>
+				<action android:name="geoplicity.cooltour.LAUNCH_SITE_UPDATE"></action>
+				<category android:name="android.intent.category.DEFAULT"></category>
+			</intent-filter>
+		</activity>
+
+</application>
+<uses-sdk android:minSdkVersion="5" />
 
 </manifest> 
