@@ -11,6 +11,11 @@ public class Constants {
 	//intent actions
 	public static final String INTENT_ACTION_BEGIN_TOUR = "geoplicity.cooltour.BEGIN_TOUR";
 	public static final String INTENT_ACTION_UPDATE_LOCATION = "geoplicity.cooltour.UPDATE_LOCATION";
+	public static final String INTENT_ACTION_LAUNCH_SITE_UPDATER = "geoplicity.cooltour.LAUNCH_SITE_UPDATER";
+	public static final String INTENT_ACTION_LAUNCH_SITE_UPDATE = "geoplicity.cooltour.LAUNCH_SITE_UPDATE";
+	
+	//intent extras
+	public static final String INTENT_EXTRA_SITE_UPDATE = "geoplicity.cooltour.SITE_UPDATE";
 	
 	//default property files
 	public static final String DEFAULT_APP_PROPERTIES = "app-props.txt";
