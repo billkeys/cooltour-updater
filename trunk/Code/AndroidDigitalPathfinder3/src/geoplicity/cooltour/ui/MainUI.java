@@ -1,6 +1,16 @@
+/**
+ * @author - Abuelsaad and Goldsmith
+ * 
+ */
+
 package geoplicity.cooltour.ui;
 
+import geoplicity.cooltour.sites.NoSitePropsException;
+import geoplicity.cooltour.sites.SiteListCreator;
 import geoplicity.cooltour.util.Constants;
+
+import java.util.Iterator;
+import java.util.List;
 
 import org.geoplicity.mobile.util.Logger;
 import org.geoplicity.mobile.util.Property;
@@ -8,6 +18,7 @@ import org.geoplicity.mobile.util.Property;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -18,10 +29,6 @@ import android.widget.Spinner;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemSelectedListener;
 
-/**
- * The initial Activity (UI screen)
- *
- */
 public class MainUI extends Activity {	
 	
 	//Menu item for launching "Updater" Activity
@@ -44,6 +51,11 @@ public class MainUI extends Activity {
 	//Adapter for connecting to Tour Selection Spinner
 	private ArrayAdapter<CharSequence> m_TourSelectionAdapter;
 	
+	//Current Root Directory
+	private String m_RootDir;
+	//Current Site Selection
+	private String m_SelectedSite;
+	
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -52,15 +64,11 @@ public class MainUI extends Activity {
         setContentView(R.layout.main);	
         //Bind to elements in the Layout
         bindToLayout();
-        
-        loadProperties();
-        m_SiteSelectionAdapter.add("Staatsburg");
-        m_SiteSelectionAdapter.add("Olana");
-        m_SiteSelectionAdapter.add("Locust Grove");
-        m_SiteSelectionAdapter.add("Springside");
+        loadApplicationProperties();
         
         m_TourSelectionAdapter.add("Landscape");
-        m_TourSelectionAdapter.add("Full Tour");         
+        m_TourSelectionAdapter.add("Full Tour");  
+          
     }
     
     
@@ -83,6 +91,7 @@ public class MainUI extends Activity {
     	public void onClick(View v) {
     		Logger.log(Logger.INPUT,"begin button clicked");
     		Logger.log(Logger.TRACE,"sending intent " + Constants.INTENT_ACTION_BEGIN_TOUR);
+    		loadSiteSpecificProperties();
         	Intent intent = new Intent(Constants.INTENT_ACTION_BEGIN_TOUR);
         	startActivity(intent);
     	}
@@ -106,13 +115,14 @@ public class MainUI extends Activity {
         m_SiteSelectionAdapter = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_spinner_item);
         m_SiteSelectionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         m_SiteSelectionList.setAdapter(m_SiteSelectionAdapter);
+        m_SiteSelectionList.setOnItemSelectedListener(new SiteListSelectedListener());
         
         //Configure Tour Select Spinner
         m_TourSelectionList = (Spinner) findViewById(R.id.TourSelect);
         m_TourSelectionAdapter = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_spinner_item);
         m_TourSelectionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         m_TourSelectionList.setAdapter(m_TourSelectionAdapter);
-        m_TourSelectionList.setOnItemSelectedListener(new MyOnItemSelectedListener());
+        m_TourSelectionList.setOnItemSelectedListener(new TourListSelectedListener());
         
         //Begin Tour Button
         m_BeginButton = (Button)findViewById(R.id.begin_button); 
@@ -137,40 +147,72 @@ public class MainUI extends Activity {
         return true;
     }
     
-    
     /**
-     * Load the application properties
+     * Used for displaying the currently downloaded Site Plugins
+     * Retrieves available site plugins (as a List<String>)
+     *  from geoplicity.cooltour.sites.SiteListCreator()
+     * 
      */
-    private void loadProperties(){    	
-    	//Get the app properties
-    	//Property.loadAppProperties();
-    	Property.loadProperties(Constants.DEFAULT_APP_PROPERTIES);
-    	
-    	//Get the root dir property (loaded as an app property)
-    	String rootDir = Property.getProperty("app.root.dir");    	
-
-    	//Load main geo properties
-    	Property.loadProperties(rootDir + Constants.DEFAULT_GEO_PROPERTIES);
-    	
-    	//Initialize the logger, which must be done after loading the geo property file
-    	Logger.init();	
-    	Logger.log(Logger.DEBUG, "root directory is " + rootDir);
-    	
-    	//Load the map properties
-    	Property.loadProperties(rootDir + Constants.DEFAULT_MAP_PROPERTIES); 
-    	
-    	
-    	//Load the way file which comes from the mapineer browser	TODO
-    	Property.loadProperties(Constants.DEFAULT_WAY_PROPERTIES);
-    	
-    	
-    	//Load the optimal triangle file which comes from the projection tool	TODO
-    	Property.loadProperties(Constants.DEFAULT_TRI_PROPERTIES);
-    	
-    	  
+	private void displaySiteSpecificProperties(){
+    	SiteListCreator siteCreator = new SiteListCreator();
+    	try {
+    		List<String> siteList = siteCreator.getSiteChoices();
+    		Iterator<String> siteListIterator = siteList.iterator();
+    		while (siteListIterator.hasNext()){
+    			m_SiteSelectionAdapter.add(siteListIterator.next());
+    		}
+    	}
+    	catch (NoSitePropsException loadDefault){
+    		//TODO:
+    		//Just display single site Staatsburg.
+    	}
     }
     
-    public class MyOnItemSelectedListener implements OnItemSelectedListener {
+    /**
+     * Load the application properties (app-props.txt)
+     * 
+     *      app.root.dir        --> /Geoplicity
+     *      
+     * Invokes method (displaySiteSpecificProperties) to display available
+     *  site choices to user.
+     */
+    private void loadApplicationProperties(){   
+    	Property.loadProperties(Constants.DEFAULT_APP_PROPERTIES);
+    	m_RootDir = Property.getProperty("app.root.dir");   
+        displaySiteSpecificProperties();
+    }
+    
+    /**
+     * Loads the site specific properties 
+     *                               <Typical Location>
+     *    - GEO Properties      --> /Geoplicity/site_selected/geo-props.txt
+     *    - MAP Properties      --> /Geoplicity/site_selected/config/map-props.txt
+     *    - WAY Properties      --> /Geoplicity/site_selected/config/way-props.txt
+     *    - TRI Properties      --> /Geoplicity/site_selected/config/tri-props.txt
+     *    - GPS Properties      --> /Geoplicity/site_selected/config/nmea.txt
+     */
+    private void loadSiteSpecificProperties() {
+    	Property.loadProperties(m_RootDir + "/" + m_SelectedSite + Constants.DEFAULT_GEO_PROPERTIES);
+    	Log.v("LOAD SITE PROPERTIES", m_RootDir + "/" + m_SelectedSite + Constants.DEFAULT_GEO_PROPERTIES);
+    	Logger.init();	
+    	Logger.log(Logger.DEBUG, "Site root directory is: "+m_RootDir + "/" + m_SelectedSite);
+    	Property.loadProperties(m_RootDir + "/" + m_SelectedSite + Property.getProperty("map.props"));
+    	Property.loadProperties(m_RootDir + "/" + m_SelectedSite + Property.getProperty("way.props"));
+    	Property.loadProperties(m_RootDir + "/" + m_SelectedSite + Property.getProperty("tri.props"));
+    	Property.loadProperties(m_RootDir + "/" + m_SelectedSite + Property.getProperty("gps.sim.file"));
+    }
+    
+    
+    /**
+     * Button click handler used for grabbing selected tour length from user.
+     * 
+     * Displays tour length statistics in the following format
+     * 
+     *        The tour selected is <name of tour>
+     *        Dist: <distance> mi / <number of stops> stops
+     *
+     */
+    public class TourListSelectedListener implements OnItemSelectedListener {
 
         public void onItemSelected(AdapterView<?> parent,
             View view, int pos, long id) {
@@ -181,5 +223,23 @@ public class MainUI extends Activity {
         public void onNothingSelected(AdapterView parent) {
           // Do nothing.
         }
+    }
+    
+    /**
+     * Button click handler used for grabbing selected tour from user.
+     * 
+     * Modifies class attribute (m_SelectedSite) to contain the tour selected
+     *  by the user.
+     *
+     */
+    public class SiteListSelectedListener implements OnItemSelectedListener {
+    	
+    	public void onItemSelected(AdapterView<?> siteListSpinner,
+            View view, int pos, long id){
+    		m_SelectedSite = siteListSpinner.getItemAtPosition(pos).toString();
+    		
+    	}
+    	
+    	public void onNothingSelected(AdapterView parent){}
     }
 }
