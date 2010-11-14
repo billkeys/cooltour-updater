@@ -22,7 +22,7 @@ import android.widget.AdapterView.OnItemSelectedListener;
  * The initial Activity (UI screen)
  *
  */
-public class MainUI extends Activity {	//TODO not finished
+public class MainUI extends Activity {	
 	
 	//Menu item for launching "Updater" Activity
 	private static final int UPDATE_ID = Menu.FIRST; 
@@ -44,9 +44,7 @@ public class MainUI extends Activity {	//TODO not finished
 	//Adapter for connecting to Tour Selection Spinner
 	private ArrayAdapter<CharSequence> m_TourSelectionAdapter;
 	
-	/**
-	 * Called when the activity is first created.
-	 */
+	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,30 +54,52 @@ public class MainUI extends Activity {	//TODO not finished
         bindToLayout();
         
         loadProperties();
-        
-        m_SiteSelectionList.setAdapter(m_SiteSelectionAdapter);
         m_SiteSelectionAdapter.add("Staatsburg");
         m_SiteSelectionAdapter.add("Olana");
         m_SiteSelectionAdapter.add("Locust Grove");
         m_SiteSelectionAdapter.add("Springside");
         
-        m_TourSelectionList.setAdapter(m_TourSelectionAdapter);
         m_TourSelectionAdapter.add("Landscape");
-        m_TourSelectionAdapter.add("Full Tour");
-       
-        m_TourSelectionList.setOnItemSelectedListener(new MyOnItemSelectedListener());
-        
-              
-        m_BeginButton.setOnClickListener(new OnClickListener(){
-			@Override
-			public void onClick(View v) {
-				Logger.log(Logger.INPUT,"begin button clicked");
-				handleBeginTour();
-			}
-        }
-        );
+        m_TourSelectionAdapter.add("Full Tour");         
     }
     
+    
+    /**
+     * Method for handling button clicks on the "Quit Tour" Button
+     */
+    private OnClickListener m_QuitTourListener = new OnClickListener() {
+        public void onClick(View v) {
+          System.exit(0);
+        }
+    };
+    
+    /**
+     * Method for handling button clicks on the "Begin Tour" Button
+     * 
+     * Currently has the responsibility of invoking the next Activity 
+     *  (MapActivity)
+     */
+    private OnClickListener m_BeginTourListener = new OnClickListener() {
+    	public void onClick(View v) {
+    		Logger.log(Logger.INPUT,"begin button clicked");
+    		Logger.log(Logger.TRACE,"sending intent " + Constants.INTENT_ACTION_BEGIN_TOUR);
+        	Intent intent = new Intent(Constants.INTENT_ACTION_BEGIN_TOUR);
+        	startActivity(intent);
+    	}
+    };
+    
+    /**
+     * Binds the following local reference variables to the XML Layout
+     *       Spinner m_SiteSelectionList --> R.id.SiteSelect
+     *       Spinner m_TourSelectionList --> R.id.TourSelect
+     *       Button m_BeginButton        --> R.id.begin_button
+     *       Button m_QuitButton         --> R.id.quit_button
+     *       
+     * Creates the following local reference variables for updating text on 
+     * the display.
+     *       ArrayAdapter m_SiteSelectionAdapter --> Used to update Site List
+     *       ArrayAdapter m_TourSelectionAdapter --> Used to update Tour List
+     */
     private void bindToLayout(){
     	//Configure Site Select Spinner
     	m_SiteSelectionList = (Spinner) findViewById(R.id.SiteSelect);
@@ -91,15 +111,24 @@ public class MainUI extends Activity {	//TODO not finished
         m_TourSelectionList = (Spinner) findViewById(R.id.TourSelect);
         m_TourSelectionAdapter = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_spinner_item);
         m_TourSelectionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        m_TourSelectionList.setAdapter(m_TourSelectionAdapter);
+        m_TourSelectionList.setOnItemSelectedListener(new MyOnItemSelectedListener());
         
         //Begin Tour Button
         m_BeginButton = (Button)findViewById(R.id.begin_button); 
+        m_BeginButton.setOnClickListener(m_BeginTourListener);
         
         //Quit Tour Button
         m_QuitButton = (Button)findViewById(R.id.quit_button);
         m_QuitButton.setOnClickListener(m_QuitTourListener);
     }
     
+    /**
+     * Used for handling the Menu Button
+     * Displays two Options:
+     *    1. Launching the Updater Activity
+     *    2. Launching an Activity describing the Geoplicity project
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
@@ -108,22 +137,6 @@ public class MainUI extends Activity {	//TODO not finished
         return true;
     }
     
-    private OnClickListener m_QuitTourListener = new OnClickListener() {
-        public void onClick(View v) {
-          System.exit(0);
-        }
-    };
-    
-    
-    
-    /**
-     * The "Begin Tour" button was clicked, start the tour
-     */
-    private void handleBeginTour(){
-    	Logger.log(Logger.TRACE,"sending intent " + Constants.INTENT_ACTION_BEGIN_TOUR);
-    	Intent intent = new Intent(Constants.INTENT_ACTION_BEGIN_TOUR);
-    	startActivity(intent);
-    }
     
     /**
      * Load the application properties
