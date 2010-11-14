@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Hello World!</string>
+    <string name="app_name">eSheepFinder</string>
+    <string name="begin_tour">Begin Tour</string>
+	<string name="quit_app">Quit</string>
+	<string name="site_prompt">Please Choose Your Current Site</string>
+	<string name="app_title">Digital PathFinder</string>
+	<string name="tour_prompt">Please select a tour</string>
+	<string name="tour_begin">Start at the beginning</string>
+	<string name="menu_updater">Launch Updater</string>
+	<color name="green">#008000</color>
+	<color name="red">#ff0000</color>
+	<string name="menu_about">About Digital PathFinder</string>
+	<string name="updater">Site Updater</string>
+</resources>
