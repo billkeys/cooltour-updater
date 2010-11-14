@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="hello">Hello World!</string>
-    <string name="app_name">eSheepFinder</string>
-    <string name="begin_tour">Begin Tour</string>
-<string name="updater">Site Updater</string>
-</resources>
