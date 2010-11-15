@@ -144,7 +144,7 @@ public class MapManager extends ImageView{
     	String mapProperties = rootDir + Property.getProperty("map.props");
 
     	Property.loadProperties(mapProperties);
-    	Tile.dir = Property.storageDevice + rootDir + "/images/";
+    	Tile.dir = Property.getProperty("current.site")+ "/images/";
     	
     	Tile.prefix = Property.takeProperty("map.tile.prefix");
     	Tile.type = Property.takeProperty("map.tile.type");
