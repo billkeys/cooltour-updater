@@ -25,6 +25,7 @@ import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.Spinner;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemSelectedListener;
@@ -50,6 +51,9 @@ public class MainUI extends Activity {
 	private Spinner m_TourSelectionList;
 	//Adapter for connecting to Tour Selection Spinner
 	private ArrayAdapter<CharSequence> m_TourSelectionAdapter;
+	
+	//CheckBox for Start Tour at Beginning
+	private CheckBox m_StartAtBegin;
 	
 	//Current Root Directory
 	private String m_RootDir;
@@ -131,6 +135,9 @@ public class MainUI extends Activity {
         //Quit Tour Button
         m_QuitButton = (Button)findViewById(R.id.quit_button);
         m_QuitButton.setOnClickListener(m_QuitTourListener);
+        
+        //Start Tour Beginning Check Box
+        m_StartAtBegin = (CheckBox)findViewById(R.id.StartTourBegin);
     }
     
     /**
@@ -183,6 +190,11 @@ public class MainUI extends Activity {
     }
     
     /**
+     * Sets site specific properties
+     * 
+     *      current.site          --> user selected site
+     *      tour.sequence.enabled --> sets true if tour should start from beginning
+     * 
      * Loads the site specific properties 
      *                               <Typical Location>
      *    - GEO Properties      --> /Geoplicity/site_selected/geo-props.txt
@@ -192,10 +204,15 @@ public class MainUI extends Activity {
      *    - GPS Properties      --> /Geoplicity/site_selected/config/nmea.txt
      */
     private void loadSiteSpecificProperties() {
+    	if (m_StartAtBegin.isChecked())
+    		Property.setProperty("tour.sequence.enabled", "true");
+    	else
+    		Property.setProperty("tour.sequence.enabled", "false");
     	Property.loadProperties(m_RootDir + "/" + m_SelectedSite + Constants.DEFAULT_GEO_PROPERTIES);
     	Log.v("LOAD SITE PROPERTIES", m_RootDir + "/" + m_SelectedSite + Constants.DEFAULT_GEO_PROPERTIES);
     	Logger.init();	
     	Logger.log(Logger.DEBUG, "Site root directory is: "+m_RootDir + "/" + m_SelectedSite);
+    	Property.setProperty("current.site", m_SelectedSite);
     	Property.loadProperties(m_RootDir + "/" + m_SelectedSite + Property.getProperty("map.props"));
     	Property.loadProperties(m_RootDir + "/" + m_SelectedSite + Property.getProperty("way.props"));
     	Property.loadProperties(m_RootDir + "/" + m_SelectedSite + Property.getProperty("tri.props"));
