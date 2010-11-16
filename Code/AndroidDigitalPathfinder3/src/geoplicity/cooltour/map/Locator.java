@@ -122,12 +122,6 @@ public class Locator{
             yo -= POLY_SHADOW_OFFSET;
         }
         
-        //Render the shadow polygon
-        this.drawPoly(canvas, m_ShadowVertices, xo, yo, m_PaintShadow);
-        
-        //Render the main polygon (in the middle)
-        this.drawPoly(canvas, m_Vertices, 0, 0, m_Paint);
-        
         //Center sprite (on top) around it's screen coordinate
         int scrX = m_WorldX - m_MapMgr.getViewX();
         int scrY = m_WorldY - m_MapMgr.getViewY();
