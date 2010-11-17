@@ -5,6 +5,7 @@ import java.util.TimerTask;
 
 import org.geoplicity.mobile.util.Logger;
 
+import geoplicity.cooltour.map.AdvMapManager;
 import geoplicity.cooltour.map.MapManager;
 import geoplicity.cooltour.util.Constants;
 import android.app.Activity;
@@ -20,7 +21,7 @@ import android.view.WindowManager;
  */
 public class MapActivity extends Activity {
 	
-	private MapManager mapMgr;
+	private AdvMapManager mapMgr;
 	
 	//The following variables are for testing only
 	private LocationTimerTask m_locationTask;	
@@ -37,7 +38,7 @@ public class MapActivity extends Activity {
 		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		
 		Display display = ((WindowManager)getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-		mapMgr = new MapManager(this, display.getWidth(), display.getHeight());
+		mapMgr = new AdvMapManager(this, display.getWidth(), display.getHeight());
 		this.setContentView(mapMgr);
 		
 		if(m_locationTask == null){		//for testing only
