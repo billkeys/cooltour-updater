@@ -73,6 +73,56 @@ public class AdvMapManager extends MapManager {
          }
          
          /**
+          * Update the map
+          */
+         public void update(){
+         	Logger.log(Logger.DEBUG, "update()");
+         	WayPt pos = LocationManager.GetInstance().GetCurPosition();
+         	
+         	//If the position is null it means the lon, lat is not within range
+         	//If the boundaries are not ok, it means the x,y is off the map -- 
+         	//which should not be possible.
+         	if(pos != null)
+         		curPosition = pos;
+         	
+         	//Update the view with the user at the center
+         	this.updateView();
+         	
+         	//Save the old col, row of the upper left tile since it is possible
+         	//for the state to be the same but the tiles need to be refreshed
+         	//especially if the view is the same size or larger than a tile.
+         	int oldRow = layer[UPPER_LEFT].row;
+         	int oldCol = layer[UPPER_LEFT].col;
+         	
+         	//Update the tile info
+         	this.updateTiles();
+         	
+         	//Get the new tile configuration
+         	try {
+     			Config newConfig = this.getConfig();
+     			if(newConfig != curConfig ||
+     					oldRow != layer[UPPER_LEFT].row || oldCol != layer[UPPER_LEFT].col){
+     				this.pageInTiles(newConfig);
+     				curConfig = newConfig;
+     			}
+     			else {
+     				this.pageInTiles(newConfig);
+     			}
+     		} catch (Exception e) {
+     			Logger.log(Logger.TRAP, "An error occurred while updating map: " + e.toString());
+     		}
+         	
+     		//Get the tiled layer's upper left corner
+     		layerX = layer[UPPER_LEFT].col * Tile.width - viewX;
+     		layerY = layer[UPPER_LEFT].row * Tile.height - viewY;
+     		
+     		//Move the locator
+     		locator.update(curPosition.getX(), curPosition.getY());
+     		
+     		//Update the way manager
+     		wayManager.update();
+         }
+         /**
           * Page in the A configuration:
           * 10
           * 00
