@@ -24,18 +24,18 @@ import android.widget.ImageView;
  */
 public class MapManager extends ImageView{
 	
-	private static final Bitmap.Config BITMAP_CONFIG = Bitmap.Config.RGB_565;	//Bitmap configuration
+	protected static final Bitmap.Config BITMAP_CONFIG = Bitmap.Config.RGB_565;	//Bitmap configuration
 	
-	private Bitmap mapImage = null;
+	protected Bitmap mapImage = null;
 	
-	private int mapWidth = 0;
-	private int mapHeight = 0;
+	protected int mapWidth = 0;
+	protected int mapHeight = 0;
 
-	private WayPt curPosition = null;
+	protected WayPt curPosition = null;
 	
 	//Upper left corner of the view (screen)
-	private int viewX = 0;
-    private int viewY = 0;
+	protected int viewX = 0;
+    protected int viewY = 0;
 
     //Screen (and hence, the view) size
     private int screenW = -1;
@@ -45,27 +45,27 @@ public class MapManager extends ImageView{
     public enum Config{ START, A, B, C, D};
     
     //Current configuration, initialized to START
-    private Config curConfig = Config.START;
+    protected Config curConfig = Config.START;
     
     //Tile layer organized by index:
     // 0 1
     // 2 3
-    private Tile[] layer = new Tile[4];
+    protected Tile[] layer = new Tile[4];
     
     //Indices in the tile layer
-    private final int UPPER_LEFT = 0;
-    private final int UPPER_RIGHT = 1;
+    protected final int UPPER_LEFT = 0;
+    protected final int UPPER_RIGHT = 1;
     private final int LOWER_LEFT = 2;
-    private final int LOWER_RIGHT = 3;
+    protected final int LOWER_RIGHT = 3;
     
     //World coordinates of the tile layer.
-    private int layerX = 0;
-    private int layerY = 0;
+    protected int layerX = 0;
+    protected int layerY = 0;
 
     // Visitor's indicator on the map
-    private Locator locator = null;
+    protected Locator locator = null;
 
-    private WayManager wayManager = null; 
+    protected WayManager wayManager = null; 
 
     /**
      * Constructor
@@ -136,7 +136,7 @@ public class MapManager extends ImageView{
     /**
      * Initialize the map
      */
-    private void initMap(){
+    protected void initMap(){
     	Logger.log(Logger.TRACE, "initMap()");
     	
     	//load the tile properties
@@ -190,7 +190,7 @@ public class MapManager extends ImageView{
      * view relative to the user's location unless the user is near
      * the edge, in which case the user keeps moving but the view doesn't.
      */
-    private void updateView(){
+    protected void updateView(){
     	Logger.log(Logger.DEBUG, "updateView()");
     	int oldViewX = viewX;
     	int oldViewY = viewY;
@@ -213,7 +213,7 @@ public class MapManager extends ImageView{
     /**
      * Update the layer of four tiles.
      */
-    private void updateTiles(){  
+    protected void updateTiles(){  
     	Logger.log(Logger.DEBUG, "updateTiles()");
     	int worldx = curPosition.getX();
     	int worldy = curPosition.getY();
@@ -244,7 +244,7 @@ public class MapManager extends ImageView{
      * @return The current screen configuration
      * @throws Exception if the configuration is invalid
      */
-    private Config getConfig() throws Exception{
+    protected Config getConfig() throws Exception{
     	Logger.log(Logger.DEBUG, "getConfig()");
     	if( layer[UPPER_LEFT].equals(layer[LOWER_LEFT]) &&
     		layer[LOWER_LEFT].equals(layer[UPPER_RIGHT]) &&
@@ -278,7 +278,7 @@ public class MapManager extends ImageView{
      * @param config Tile configuration
      * @throws Exception
      */
-    private void pageInTiles(Config config) throws Exception{
+    protected void pageInTiles(Config config) throws Exception{
     	switch(config){
     		case A: pageA(); break;
     		case B: pageB(); break;
@@ -294,7 +294,7 @@ public class MapManager extends ImageView{
      * 10
      * 00
      */
-    private void pageA(){
+    protected void pageA(){
     	mapImage = BitmapFactory.decodeFile( getTileName(UPPER_LEFT) );
     }
     
@@ -303,7 +303,7 @@ public class MapManager extends ImageView{
      * 11
      * 00
      */
-    private void pageB(){
+    protected void pageB(){
     	mapImage = Bitmap.createBitmap(Tile.width * 2, Tile.height, BITMAP_CONFIG);
     	Canvas canvas = new Canvas(mapImage);
     	
@@ -319,7 +319,7 @@ public class MapManager extends ImageView{
      * 10
      * 10
      */
-    private void pageC(){
+    protected void pageC(){
     	mapImage = Bitmap.createBitmap(Tile.width, Tile.height * 2, BITMAP_CONFIG);
     	Canvas canvas = new Canvas(mapImage);
     	
@@ -335,7 +335,7 @@ public class MapManager extends ImageView{
      * 11
      * 11
      */
-    private void pageD(){
+    protected void pageD(){
     	mapImage = Bitmap.createBitmap(Tile.width * 2, Tile.height * 2, BITMAP_CONFIG);
     	Canvas canvas = new Canvas(mapImage);
     	
@@ -354,7 +354,7 @@ public class MapManager extends ImageView{
      * @param pos Position number of the tile
      * @return The filename of the specific tile
      */
-    private String getTileName(int pos){    	
+    protected String getTileName(int pos){    	
     	String tileName = Tile.dir + Tile.prefix + layer[pos].col + "_" + layer[pos].row + "." + Tile.type;
     	Logger.log(Logger.DEBUG, "getTileName: tile name is " + tileName);
     	return tileName;
