@@ -19,6 +19,7 @@ public class Constants {
 	
 	//default property files
 	public static final String DEFAULT_APP_PROPERTIES = "app-props.txt";
+	public static final String DEFAULT_SITE_PROPERTIES = "site-props.txt";
 	public static final String DEFAULT_GEO_PROPERTIES = "/geo-props.txt";
 	public static final String DEFAULT_MAP_PROPERTIES = "/map.props";
 	
