@@ -12,6 +12,7 @@
 	<color name="green">#008000</color>
 	<color name="red">#ff0000</color>
 	<string name="menu_about">About Digital PathFinder</string>
+	<string name="menu_home">Home</string>
 	<string name="updater">Site Updater</string>
 	<string name="start_update">Start</string>
 	<string name="pause_update">Pause</string>
