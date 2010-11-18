@@ -41,9 +41,9 @@ public class SiteUpdateThread extends Thread {
 			case MODE_REASSEMBLE:
 				//reassemble(Constants.UPDATE_TEMP_DIR);
 			case MODE_UNPACK:
-				
+				//unpack(Constants.UPDATE_TEMP_DIR, updateData.getName());
 			case MODE_CLEANUP:
-				
+				//deleteTemp(Constants.UPDATE_TEMP_DIR);
 			case MODE_FINISH:
 				updateSiteProps();
 			default:
@@ -102,17 +102,17 @@ public class SiteUpdateThread extends Thread {
 		try {
 			ZipInputStream zis = null;
 
-			FileInputStream fis = new FileInputStream(location+name+"\\temp\\"+name+".zip");
+			FileInputStream fis = new FileInputStream(location+name+".zip");
 			zis = new ZipInputStream(fis);
 
 			ZipEntry ze;
 
 			while ((ze = zis.getNextEntry()) != null) {
 				if (ze.getName().endsWith("/")) {
-					File dir = new File(location + name + "\\" + ze.getName());
+					File dir = new File(Constants.SDCARD_ROOT + name + "/" + ze.getName());
 					dir.mkdirs();
 				} else {
-					File f = new File(location + name + "\\" + ze.getName());
+					File f = new File(Constants.SDCARD_ROOT + name + "/" + ze.getName());
 					f.createNewFile();
 					OutputStream out = new FileOutputStream(f);
 					int sz = 0;
