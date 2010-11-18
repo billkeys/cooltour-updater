@@ -24,7 +24,13 @@ public class SiteUpdateData extends SiteData {
 	public static final String KEY_CHECKSUM = "checksum";
 	public static final String KEY_FILE_FORMAT = "file_format";
 	public static final String KEY_FILE_SIZE = "file_size";
-
+	int blocksDownloaded = 0;
+	public int getBlocksDownloaded() {
+		return blocksDownloaded;
+	}
+	public void setBlocksDownloaded(int blocksDownloaded) {
+		this.blocksDownloaded = blocksDownloaded;
+	}
 	public SiteUpdateData() {
 		super();
 	}

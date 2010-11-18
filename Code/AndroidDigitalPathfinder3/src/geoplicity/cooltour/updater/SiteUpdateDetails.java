@@ -55,37 +55,41 @@ public class SiteUpdateDetails extends Activity {
         	selectedSite = SiteList.mSiteList.get(selectedSiteIndex);
             mUpdate = getSiteUpdateData(selectedSite);
 
+            if (mUpdate != null) {
+            	Log.v(Constants.LOG_TAG, mUpdate.toString());
+                setContentView(R.layout.site_update_details);
+                TextView name = (TextView) findViewById(R.id.site_update_details_name);
+                name.setText(mUpdate.getName());
+                TextView version = (TextView) findViewById(R.id.site_update_details_version);
+                version.setText(mUpdate.getVersion());
+                TextView blocks = (TextView) findViewById(R.id.site_update_details_blocks);
+                blocks.setText(mUpdate.getBlockCount()+"");
 
+                TextView size = (TextView) findViewById(R.id.site_update_details_size);
+                size.setText(mUpdate.getFileSize()+"");
+                Button b = (Button) findViewById(R.id.site_update_details_button);
+               	b.setText(R.string.start_update);
+                
+
+            }
+            else {    
+                AlertDialog.Builder diag =  new AlertDialog.Builder(this);
+            	diag.setMessage("Failed to get site data");
+            	diag.setPositiveButton("Try Again", null);
+            	diag.setNegativeButton("Cancel", null);
+            	diag.show();
+            }
         }
         else if (extras.get(Constants.INTENT_EXTRA_SITE_RUNNING_UPDATE) != null) {
-        	SiteUpdateManager mgr = SiteUpdateManager.getInstance();
-        	//mgr.getUpdate();
+        	Log.v(Constants.LOG_TAG, mUpdate.toString());
+
+        	watchUpdate();
+
+//            Button b = (Button) findViewById(R.id.site_update_details_button);
+//           	b.setText(R.string.start_update);
         }
         
-        if (mUpdate != null) {
-        	Log.v(Constants.LOG_TAG, mUpdate.toString());
-            setContentView(R.layout.site_update_details);
-            TextView name = (TextView) findViewById(R.id.site_update_details_name);
-            name.setText(mUpdate.getName());
-            TextView version = (TextView) findViewById(R.id.site_update_details_version);
-            version.setText(mUpdate.getVersion());
-            TextView blocks = (TextView) findViewById(R.id.site_update_details_blocks);
-            blocks.setText(mUpdate.getBlockCount()+"");
 
-            TextView size = (TextView) findViewById(R.id.site_update_details_size);
-            size.setText(mUpdate.getFileSize()+"");
-            Button b = (Button) findViewById(R.id.site_update_details_button);
-           	b.setText(R.string.start_update);
-            
-
-        }
-        else {    
-            AlertDialog.Builder diag =  new AlertDialog.Builder(this);
-        	diag.setMessage("Failed to get site data");
-        	diag.setPositiveButton("Try Again", null);
-        	diag.setNegativeButton("Cancel", null);
-        	diag.show();
-        }
 
     }
 	public SiteUpdateData getSiteUpdateData(SiteData site) {
@@ -101,13 +105,29 @@ public class SiteUpdateDetails extends Activity {
 		return su;
 	}
 	public void startUpdate(View v) {
-		Log.v(Constants.LOG_TAG, "starting update for "+mUpdate.getName());
+
 		SiteUpdateManager mgr = SiteUpdateManager.getInstance();
 		SiteUpdateThread updateThread = mgr.getUpdate(mUpdate);
-		updateThread.run();
-	    //Intent intent = new Intent(this, com.example.app.ChooseYourBoxer.class);
-	    //startActivityForResult(intent, CHOOSE_FIGHTER);
+		updateThread.start();
+		Log.v(Constants.LOG_TAG, "starteded update for "+mUpdate.getName());
+		watchUpdate();
+//	    Intent intent = new Intent(Constants.INTENT_ACTION_LAUNCH_SITE_UPDATE);
+//	    intent.putExtra(Constants.INTENT_EXTRA_SITE_RUNNING_UPDATE, mUpdate);
+//	    startActivity(intent);
 		
+	}
+	private void watchUpdate() {
+        setContentView(R.layout.site_update_in_progress_details);
+    	SiteUpdateManager mgr = SiteUpdateManager.getInstance();
+    	SiteUpdateThread updtProc = mgr.getUpdate(mUpdate);
+        TextView name = (TextView) findViewById(R.id.site_update_details_name);
+        name.setText(mUpdate.getName());
+        TextView statusText = (TextView) findViewById(R.id.site_update_status);
+    	statusText.setText("In Progess");
+    	while (updtProc.isAlive()) {
+    		Log.v(Constants.LOG_TAG," "+mUpdate.getName()+" still alive");
+    	}
+    	statusText.setText("Complete!");
 	}
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
