@@ -27,11 +27,9 @@ public class AdvMapManager extends MapManager {
          	String rootDir = Property.getProperty("app.root.dir");
          	String mapProperties = rootDir + "/" + Property.getProperty("current.site")+
          		Property.getProperty("map.props");
-         	Log.v("initMap", "Map Properties = " + mapProperties);
 
          	Property.loadProperties(mapProperties);
          	Tile.dir = Property.storageDevice + rootDir + "/" + Property.getProperty("current.site")+ "/images/";
-         	Log.v("initMap", "Tile.dir = " + Tile.dir);
          	
          	Tile.prefix = Property.takeProperty("map.tile.prefix");
          	Tile.type = Property.takeProperty("map.tile.type");
