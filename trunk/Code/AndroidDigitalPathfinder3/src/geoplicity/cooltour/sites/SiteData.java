@@ -11,7 +11,7 @@ import java.util.Properties;
  * @author Brendon Drew (bjdrew@gmail.com)
  *
  */
-public class SiteData extends Properties{
+public class SiteData extends RemoteProperties{
 	//Properties props;
 //	String name;
 //	String updateUrl;
@@ -24,14 +24,7 @@ public class SiteData extends Properties{
 		//props = new Properties();
 	}
 	public SiteData(String locationUrl) throws IOException {
-		//props = new Properties();
-		URL url = new URL(locationUrl);
-	    URLConnection urlConn = url.openConnection(); 
-	    urlConn.setDoInput(true); 
-	    urlConn.setUseCaches(false);
-	    DataInputStream dis = new DataInputStream(urlConn.getInputStream()); 
-	    load(dis);
-		
+		super(locationUrl);
 	}
 	public String getName() {
 		return getProperty(KEY_NAME);

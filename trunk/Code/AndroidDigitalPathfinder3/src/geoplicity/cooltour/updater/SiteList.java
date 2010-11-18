@@ -2,19 +2,18 @@ package geoplicity.cooltour.updater;
 
 import geoplicity.cooltour.sites.SiteData;
 import geoplicity.cooltour.sites.SiteListAdapter;
+import geoplicity.cooltour.sites.Sites;
 import geoplicity.cooltour.ui.R;
 import geoplicity.cooltour.util.Constants;
 
+import java.io.IOException;
 import java.util.ArrayList;
-
-import org.geoplicity.mobile.util.Logger;
 
 import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 /**
  * The main activity for the updater piece.
@@ -29,30 +28,24 @@ import android.widget.ListView;
  *
  */
 public class SiteList extends ListActivity {
-    private ArrayList<SiteData> mSiteList;
-	private SiteListAdapter mSiteListAdapter;
+    public static ArrayList<SiteData> mSiteList;
+	private SiteListAdapter<SiteData> mSiteListAdapter;
 	protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-        //Logger.log(Logger.DEBUG, "SiteList onCreate()");
         Log.v(Constants.LOG_TAG, "SiteList onCreate()");
-        //setContentView(R.layout.site_list);
         ArrayList<SiteData> sites = getSites();
         mSiteListAdapter = new SiteListAdapter(this, R.layout.site_list_row, sites);
         setListAdapter(mSiteListAdapter);
     }
     public ArrayList<SiteData> getSites() {
-    	mSiteList = new ArrayList<SiteData>();
-    	//TODO Implement
-    	//Dummy Data
-    	SiteData site = new SiteData();
-    	site.setName("Olana");
-    	site.setVersion("1.2");
-    	mSiteList.add(site);
-    	site = new SiteData();
-    	site.setName("Staatsburg");
-    	site.setVersion("2.0");
-    	mSiteList.add(site);
-    	//Logger.log(Logger.DEBUG, "returing "+mSiteList.size()+" sites");
+    	
+    	try {
+			Sites sites = new Sites(Constants.UPDATE_SERVER+Constants.UPDATE_SITES_FILE);
+			mSiteList = sites.getSites();
+		} catch (IOException e) {
+			Log.e(Constants.LOG_TAG, "Failed to get sites list from "+Constants.UPDATE_SERVER, e);
+			mSiteList = new ArrayList<SiteData>();
+		}
         Log.v(Constants.LOG_TAG, "returing "+mSiteList.size()+" sites");
     	return mSiteList;
     }
@@ -60,10 +53,11 @@ public class SiteList extends ListActivity {
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		// TODO Auto-generated method stub
 		super.onListItemClick(l, v, position, id);
-		Logger.log(Logger.DEBUG, "position "+position+" selected");
-		Intent myIntent = new Intent(Constants.INTENT_ACTION_LAUNCH_SITE_UPDATE);
-//		myIntent.setClassName("geoplicity.cooltour.updater", "geoplicity.cooltour.updater.SiteUpdateDetails");
-		myIntent.putExtra(Constants.INTENT_EXTRA_SITE_UPDATE, mSiteList.get(position)); // key/value pair, where key needs current package prefix.
-		startActivity(myIntent); 
+		SiteData s = mSiteList.get(position);
+		Log.v(Constants.LOG_TAG, "position "+position+" selected, "+s.toString());
+		Intent i = new Intent(Constants.INTENT_ACTION_LAUNCH_SITE_UPDATE);
+
+		i.putExtra(Constants.INTENT_EXTRA_SITE_UPDATE, position); // key/value pair, where key needs current package prefix.
+		startActivity(i); 
 	}
 }

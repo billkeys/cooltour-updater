@@ -39,12 +39,12 @@ public class Blocker {
 	 * args[2] is the location of the file (eg. C:\Test\sdcard\geoplicity\);
 	 */
 	
-	public static void unblock(String name, String amount, String location){
+	public static void unblock(String name, int numberOfBlocks, String target){
 		try {
-			int numberOfBlocks = Integer.parseInt(amount);
-			FileOutputStream fos = new FileOutputStream(location+name+"\\temp\\"+name+".zip");
+			//int numberOfBlocks = Integer.parseInt(amount);
+			FileOutputStream fos = new FileOutputStream(target);
 			for(int i = 1;i<=numberOfBlocks;i++){
-				File f = new File(location+name+"\\temp\\"+name+i);
+				File f = new File(name+i);
 				long sizeOfFile = f.length();
 				FileInputStream fis = new FileInputStream(f);
 				byte buffer[] = new byte[(int)sizeOfFile];

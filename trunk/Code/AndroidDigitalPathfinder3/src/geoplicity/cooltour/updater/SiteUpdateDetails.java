@@ -4,11 +4,16 @@ import geoplicity.cooltour.sites.SiteData;
 import geoplicity.cooltour.ui.R;
 import geoplicity.cooltour.util.Constants;
 
-import org.geoplicity.mobile.util.Logger;
+import java.io.IOException;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -30,35 +35,88 @@ import android.widget.TextView;
  *
  */
 public class SiteUpdateDetails extends Activity {
-	SiteUpdateData update;
+	static SiteUpdateData mUpdate;
 	protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-        Logger.log(Logger.DEBUG, "SiteUpdateDetails onCreate()");
-        SiteData selectedSite;
-        if (savedInstanceState != null && savedInstanceState.get(Constants.INTENT_EXTRA_SITE_UPDATE) != null) {
-        	selectedSite = (SiteData) savedInstanceState.get(Constants.INTENT_EXTRA_SITE_UPDATE);
+        Log.v(Constants.LOG_TAG, "SiteUpdateDetails onCreate()");
+        SiteData selectedSite = null;
+        Intent i = getIntent();
+        Bundle extras = i.getExtras();
+        if (extras.get(Constants.INTENT_EXTRA_SITE_UPDATE) != null) {
+        	Log.v(Constants.LOG_TAG, extras.get(Constants.INTENT_EXTRA_SITE_UPDATE).toString());
+        	//selectedSite = (SiteData) extras.get(Constants.INTENT_EXTRA_SITE_UPDATE);
+        	Integer selectedSiteIndex = (Integer) extras.get(Constants.INTENT_EXTRA_SITE_UPDATE);
+        	selectedSite = SiteList.mSiteList.get(selectedSiteIndex);
+            mUpdate = getSiteUpdateData(selectedSite);
+
+
         }
-        else {
-        	selectedSite = new SiteData();
-        	selectedSite.setName("Unknown");
+        else if (extras.get(Constants.INTENT_EXTRA_SITE_RUNNING_UPDATE) != null) {
+        	SiteUpdateManager mgr = SiteUpdateManager.getInstance();
+        	//mgr.getUpdate();
         }
-        update = getSiteUpdateData(selectedSite);
-        //setContentView(R.layout.site_update_details);
-        setContentView(R.layout.site_update_details);
         
-        TextView name = (TextView) findViewById(R.id.SiteName);
-        name.setText(selectedSite.getName());
-        TextView version = (TextView) findViewById(R.id.SiteUpdateVersion);
-        version.setText(selectedSite.getVersion());
-        //Button b = (Button) findViewById(R.id.site_update_start);
-        //b.setText(R.string.start_update);
+        if (mUpdate != null) {
+        	Log.v(Constants.LOG_TAG, mUpdate.toString());
+            setContentView(R.layout.site_update_details);
+            TextView name = (TextView) findViewById(R.id.site_update_details_name);
+            name.setText(mUpdate.getName());
+            TextView version = (TextView) findViewById(R.id.site_update_details_version);
+            version.setText(mUpdate.getVersion());
+            TextView blocks = (TextView) findViewById(R.id.site_update_details_blocks);
+            blocks.setText(mUpdate.getBlockCount()+"");
+
+            TextView size = (TextView) findViewById(R.id.site_update_details_size);
+            size.setText(mUpdate.getFileSize()+"");
+            Button b = (Button) findViewById(R.id.site_update_details_button);
+           	b.setText(R.string.start_update);
+            
+
+        }
+        else {    
+            AlertDialog.Builder diag =  new AlertDialog.Builder(this);
+        	diag.setMessage("Failed to get site data");
+        	diag.setPositiveButton("Try Again", null);
+        	diag.setNegativeButton("Cancel", null);
+        	diag.show();
+        }
 
     }
 	public SiteUpdateData getSiteUpdateData(SiteData site) {
-		SiteUpdateData su = new SiteUpdateData();
+		if (site == null)
+			return null;
+		String siteUpdateProperties = Constants.UPDATE_SERVER+site.getName()+"/"+site.getVersion()+"/"+site.getName()+Constants.UPDATE_FILE_EXT; 
+		SiteUpdateData su = null;
+		try {
+			su = new SiteUpdateData(siteUpdateProperties);
+		} catch (IOException e) {
+			Log.v(Constants.LOG_TAG, "Failed to get site update data", e);
+		}
 		return su;
 	}
-	public void startUpdate() {
-		Log.v(Constants.LOG_TAG, "starting update for "+update.getName());
+	public void startUpdate(View v) {
+		Log.v(Constants.LOG_TAG, "starting update for "+mUpdate.getName());
+		SiteUpdateManager mgr = SiteUpdateManager.getInstance();
+		SiteUpdateThread updateThread = mgr.getUpdate(mUpdate);
+		updateThread.run();
+	    //Intent intent = new Intent(this, com.example.app.ChooseYourBoxer.class);
+	    //startActivityForResult(intent, CHOOSE_FIGHTER);
+		
 	}
+	private Handler mHandler = new Handler() {
+	    public void handleMessage(Message msg) {
+	        switch (msg.what) {
+	            case 0:
+	            //answer(msg.obj);
+	            Log.d(Constants.LOG_TAG, "retry update for "+mUpdate.getName());
+	            break;
+	    
+	            case 1:
+	            // voicemail(msg.obj);
+	            Log.d(Constants.LOG_TAG, "cancel update for "+mUpdate.getName());
+	            break;
+	    
+	        }
+	    }
+	};
 }

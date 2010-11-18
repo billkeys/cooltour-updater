@@ -2,6 +2,8 @@ package geoplicity.cooltour.updater;
 
 import geoplicity.cooltour.sites.SiteData;
 
+import java.io.IOException;
+
 /**
  * Wrapper around the properties file that contains site update data.
  * 
@@ -9,18 +11,30 @@ import geoplicity.cooltour.sites.SiteData;
  *
  */
 public class SiteUpdateData extends SiteData {
-//	long blockSize;
+/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	//	long blockSize;
 //	int blocks;
 //	String fileFormat;
 //	long fileSize;
 	public static final String KEY_BLOCK_SIZE = "block_size";
-	public static final String KEY_BLOCK_COUNT = "block_count";
+	public static final String KEY_BLOCK_COUNT = "num_blocks";
 	public static final String KEY_CHECKSUM = "checksum";
 	public static final String KEY_FILE_FORMAT = "file_format";
 	public static final String KEY_FILE_SIZE = "file_size";
 
 	public SiteUpdateData() {
 		super();
+	}
+	public SiteUpdateData(String urlString) throws IOException {
+		super(urlString);
+	}
+	public SiteUpdateData(SiteData site) {
+		super();
+		setName(site.getName());
+		setVersion(site.getVersion());
 	}
 	public long getBlockSize() {
 		return new Long(getProperty(KEY_BLOCK_SIZE));
@@ -41,7 +55,7 @@ public class SiteUpdateData extends SiteData {
 		setProperty(KEY_FILE_FORMAT, fileFormat);
 	}
 	public long getFileSize() {
-		return new Long(getProperty(KEY_FILE_SIZE));
+		return Long.parseLong(getProperty(KEY_FILE_SIZE));
 	}
 	public void setFileSize(long fileSize) {
 		setProperty(KEY_FILE_SIZE, fileSize+"");
