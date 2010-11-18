@@ -133,6 +133,19 @@ public class MapManager extends ImageView{
 		wayManager.update();
     }
     
+	/**
+	 * Returns true if the landmark is visible on the display.
+	 */
+	public boolean inView(int x, int y) {
+		if (x < viewX || x > (viewX + screenW))
+			return false;
+
+		if (y < viewY || y > (viewY + screenH))
+			return false;
+
+		return true;
+	}
+     
     /**
      * Initialize the map
      */
