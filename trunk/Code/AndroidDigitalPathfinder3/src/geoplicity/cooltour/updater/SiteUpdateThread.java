@@ -7,8 +7,10 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
+import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -20,6 +22,7 @@ public class SiteUpdateThread extends Thread {
 	public static final int MODE_REASSEMBLE = 2;
 	public static final int MODE_UNPACK = 3;
 	public static final int MODE_CLEANUP = 4;
+	public static final int MODE_FINISH = 5;
 	int mode;
 	int currentBlock = 1;
 	SiteUpdateData updateData; 
@@ -41,6 +44,8 @@ public class SiteUpdateThread extends Thread {
 				
 			case MODE_CLEANUP:
 				
+			case MODE_FINISH:
+				updateSiteProps();
 			default:
 			
 		}
@@ -142,5 +147,28 @@ public class SiteUpdateThread extends Thread {
 			}
 		}
 		return (path.delete());
+	}
+	private boolean updateSiteProps() {
+		File sites = new File("/sdcard/Geoplicity/"+Constants.DEFAULT_SITE_PROPERTIES);
+		if (!sites.exists()) {
+			try {
+				if (!sites.createNewFile()) {
+					Log.e(Constants.LOG_TAG,"Failed to create "+sites);
+					return false;
+				}
+				else {
+					Log.v(Constants.LOG_TAG,"Created "+sites);
+				}
+				Properties sitesProps = new Properties();
+				sitesProps.load(new FileInputStream(sites));
+				sitesProps.setProperty(updateData.getName(), updateData.getVersion());
+				sitesProps.save(new FileOutputStream(sites), "Updated "+updateData.getName());
+			} catch (IOException e) {
+				Log.e(Constants.LOG_TAG, "Failed to update"+sites, e);
+				return false;
+			}
+		}
+		return true;
+
 	}
 }

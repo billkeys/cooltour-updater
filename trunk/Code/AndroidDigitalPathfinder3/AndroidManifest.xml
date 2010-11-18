@@ -12,6 +12,10 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+             <intent-filter>
+        		<category android:name="android.intent.category.DEFAULT" />
+        		<action android:name="geoplicity.cooltour.MAIN_UI"/>
+        	</intent-filter>
         </activity>
         
         <activity android:name=".MapActivity"

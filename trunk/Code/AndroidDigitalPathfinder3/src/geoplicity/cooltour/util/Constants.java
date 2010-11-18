@@ -9,6 +9,7 @@ public class Constants {
 	public static final String LOG_TAG = "CoolTour";
 	
 	//intent actions
+	public static final String INTENT_ACTION_MAIN_UI = "geoplicity.cooltour.MAIN_UI";
 	public static final String INTENT_ACTION_BEGIN_TOUR = "geoplicity.cooltour.BEGIN_TOUR";
 	public static final String INTENT_ACTION_UPDATE_LOCATION = "geoplicity.cooltour.UPDATE_LOCATION";
 	public static final String INTENT_ACTION_LAUNCH_SITE_UPDATER = "geoplicity.cooltour.LAUNCH_SITE_UPDATER";
@@ -31,9 +32,10 @@ public class Constants {
 	public static final int TEST_INTERVAL = 120;	//how many seconds the test case will run, 0 means indefinite
 	public static final String TEST_FILE = "/sdcard/test/log-2010-5-28.txt";
 	
-	//Update URL
+	//Updater Constats
+	public static final String GEOPLICITY_SDCARD_ROOT = "/sdcard/Geoplicity/";
 	public static final String UPDATE_SERVER = "http://brendondrew.com/geoplicity/sites/";
 	public static final String UPDATE_FILE_EXT = ".txt";
 	public static final String UPDATE_SITES_FILE = "sites"+UPDATE_FILE_EXT;
-	public static final String UPDATE_TEMP_DIR = "/sdcard/Geoplicity/.tmp/";
+	public static final String UPDATE_TEMP_DIR = GEOPLICITY_SDCARD_ROOT+".tmp/";
 }

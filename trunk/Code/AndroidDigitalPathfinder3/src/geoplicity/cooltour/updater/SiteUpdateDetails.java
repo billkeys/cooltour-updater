@@ -13,6 +13,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -35,6 +37,10 @@ import android.widget.TextView;
  *
  */
 public class SiteUpdateDetails extends Activity {
+	//Menu item for launching "MaunUI" Activity
+	private static final int MAIN_UI_ID = Menu.FIRST; 
+	//Menu item for launching "About Geoplicity" Activity
+	private static final int ABOUT_ID = Menu.FIRST + 1;     
 	static SiteUpdateData mUpdate;
 	protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
@@ -103,6 +109,32 @@ public class SiteUpdateDetails extends Activity {
 	    //startActivityForResult(intent, CHOOSE_FIGHTER);
 		
 	}
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        menu.add(0, MAIN_UI_ID, 0, R.string.menu_home);
+        menu.add(0, ABOUT_ID, 0, R.string.menu_about);
+        return true;
+    }
+    @Override
+    public boolean onMenuItemSelected(int featureId, MenuItem item) {
+    	// TODO Auto-generated method stub
+    	//return super.onMenuItemSelected(featureId, item);
+    	switch (featureId) {
+    		case MAIN_UI_ID:
+    			Intent i = new Intent(Constants.INTENT_ACTION_MAIN_UI);
+    			startActivity(i); 
+
+    		break;
+    		case ABOUT_ID:
+    			//TODO Implement
+    		break;
+    		default:
+    			
+    		
+    	}
+    	return true;
+    }
 	private Handler mHandler = new Handler() {
 	    public void handleMessage(Message msg) {
 	        switch (msg.what) {
