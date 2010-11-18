@@ -11,11 +11,13 @@ import java.util.Set;
 import java.util.Vector;
 
 import org.geoplicity.mobile.util.Logger;
+import org.geoplicity.mobile.util.Property;
 
 public class SiteListCreator extends Properties {
 	
 	static final long serialVersionUID = 1L;
 	private static final String STORAGE_DEVICE = "/sdcard/";
+	
 	
 	@SuppressWarnings("unchecked")
 	public List<String> getSiteChoices() throws NoSitePropsException{

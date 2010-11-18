@@ -7,10 +7,13 @@ package geoplicity.cooltour.ui;
 
 import geoplicity.cooltour.sites.NoSitePropsException;
 import geoplicity.cooltour.sites.SiteListCreator;
+import geoplicity.cooltour.sites.TourListCreator;
 import geoplicity.cooltour.util.Constants;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.geoplicity.mobile.util.Logger;
 import org.geoplicity.mobile.util.Property;
@@ -51,6 +54,8 @@ public class MainUI extends Activity {
 	private Spinner m_TourSelectionList;
 	//Adapter for connecting to Tour Selection Spinner
 	private ArrayAdapter<CharSequence> m_TourSelectionAdapter;
+	//HashMap containing key and value pairs for list of tours and tour details
+	private HashMap<String, String> m_TourList;
 	
 	//CheckBox for Start Tour at Beginning
 	private CheckBox m_StartAtBegin;
@@ -69,10 +74,6 @@ public class MainUI extends Activity {
         //Bind to elements in the Layout
         bindToLayout();
         loadApplicationProperties();
-        
-        m_TourSelectionAdapter.add("Landscape");
-        m_TourSelectionAdapter.add("Full Tour");  
-          
     }
     
     
@@ -233,8 +234,12 @@ public class MainUI extends Activity {
 
         public void onItemSelected(AdapterView<?> parent,
             View view, int pos, long id) {
-          Toast.makeText(parent.getContext(), "The tour selected is " +
-              parent.getItemAtPosition(pos).toString()+"\n Dist: 1.06 mi / 10 stops", Toast.LENGTH_LONG).show();
+        	String tourSelected = parent.getItemAtPosition(pos).toString();
+        	if(tourSelected != null)
+        	{
+        		Toast.makeText(parent.getContext(), "The tour selected is " +
+        			tourSelected+"\n" + m_TourList.get(tourSelected), Toast.LENGTH_LONG).show();
+        	}
         }
 
         public void onNothingSelected(AdapterView parent) {
@@ -253,7 +258,22 @@ public class MainUI extends Activity {
     	
     	public void onItemSelected(AdapterView<?> siteListSpinner,
             View view, int pos, long id){
+    		m_TourSelectionAdapter.clear();
     		m_SelectedSite = siteListSpinner.getItemAtPosition(pos).toString();
+    		TourListCreator tourCreator = new TourListCreator(m_SelectedSite);
+    		try {
+    			m_TourList = tourCreator.getTourChoices();
+    			Set<String> tourListKeys = m_TourList.keySet();
+    			Iterator<String> tourListIterator = tourListKeys.iterator();
+    			while(tourListIterator.hasNext()) {
+    				m_TourSelectionAdapter.add(tourListIterator.next());
+    			}
+        	}
+        	catch (NoSitePropsException loadDefault){
+        		//TODO:
+        		//Just display single site Staatsburg.
+        	}
+    		
     		
     	}
     	
