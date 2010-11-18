@@ -1,5 +1,7 @@
 package geoplicity.cooltour.updater;
 
+import geoplicity.cooltour.util.Constants;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -10,24 +12,54 @@ import java.net.URL;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-public class SiteUpdaterThread extends Thread {
+import android.util.Log;
 
-	public SiteUpdaterThread(SiteUpdateDetails update) {
-		
+public class SiteUpdateThread extends Thread {
+	public static final int MODE_START = 0; 
+	public static final int MODE_RESUME = 1;
+	public static final int MODE_UNPACK = 2;
+	public static final int MODE_CLEANUP = 3;
+	int mode;
+	int currentBlock = 1;
+	SiteUpdateData updateData; 
+	public SiteUpdateThread(SiteUpdateData update) {
+		updateData = update;
+		//currentBlock = updateData.get
 	}
 	@Override
 	public void run() {
-		// TODO Auto-generated method stub
-		super.run();
+		Log.v(Constants.LOG_TAG, "start run, mode="+mode);
+		switch (mode) {
+			case MODE_START:
+			
+			case MODE_RESUME:
+				
+			case MODE_UNPACK:
+				
+			case MODE_CLEANUP:
+				
+			default:
+			
+		}
 	}
-	private void downloadBlock(String from, String name, String amount, String to){
-		try {
-			for(int i=1;i<=Integer.parseInt(amount);i++){
-			URL url = new URL(from+name+i);
-			BufferedInputStream in = new BufferedInputStream(url.openStream());
-			File dir = new File(to+name+"\\temp\\");
+	private void downloadBlocks(String tmpDir) {
+		File dir = new File(tmpDir);
+		if (!dir.exists()) {
 			dir.mkdirs();
-			FileOutputStream fos = new FileOutputStream(dir+"\\"+name+i);
+		}
+		for(int i=currentBlock;i<=updateData.getBlockCount();i++){
+			downloadBlock(null, null);
+		}
+
+	}
+	private void downloadBlock(String urlString, String saveTo){
+		try {
+			//for(int i=1;i<=Integer.parseInt(amount);i++){
+			URL url = new URL(urlString);
+			BufferedInputStream in = new BufferedInputStream(url.openStream());
+			
+			
+			FileOutputStream fos = new FileOutputStream(saveTo);
 			BufferedOutputStream bout = new BufferedOutputStream(fos, 1024);
 			byte[] data = new byte[1024];
 			int x = 0;
@@ -36,7 +68,7 @@ public class SiteUpdaterThread extends Thread {
 			}
 			bout.close();
 			in.close();
-			}
+			//}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

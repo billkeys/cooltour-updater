@@ -21,8 +21,8 @@ public class UpdaterTester {
 		//CleanUp.deleteTemp(args[4]+args[1]+"\\temp");
 	}
 	public static void testThread() {
-		SiteUpdateDetails update = new SiteUpdateDetails();
-		SiteUpdaterThread updateThread = new SiteUpdaterThread(update);
+		SiteUpdateData update = new SiteUpdateData();
+		SiteUpdateThread updateThread = new SiteUpdateThread(update);
 	}
 
 }

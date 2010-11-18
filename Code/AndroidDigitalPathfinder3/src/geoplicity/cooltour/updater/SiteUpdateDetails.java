@@ -1,12 +1,15 @@
 package geoplicity.cooltour.updater;
 
-import org.geoplicity.mobile.util.Logger;
-
 import geoplicity.cooltour.sites.SiteData;
 import geoplicity.cooltour.ui.R;
 import geoplicity.cooltour.util.Constants;
+
+import org.geoplicity.mobile.util.Logger;
+
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.Button;
 import android.widget.TextView;
 
 /**
@@ -27,6 +30,7 @@ import android.widget.TextView;
  *
  */
 public class SiteUpdateDetails extends Activity {
+	SiteUpdateData update;
 	protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         Logger.log(Logger.DEBUG, "SiteUpdateDetails onCreate()");
@@ -38,6 +42,7 @@ public class SiteUpdateDetails extends Activity {
         	selectedSite = new SiteData();
         	selectedSite.setName("Unknown");
         }
+        update = getSiteUpdateData(selectedSite);
         //setContentView(R.layout.site_update_details);
         setContentView(R.layout.site_update_details);
         
@@ -45,6 +50,15 @@ public class SiteUpdateDetails extends Activity {
         name.setText(selectedSite.getName());
         TextView version = (TextView) findViewById(R.id.SiteUpdateVersion);
         version.setText(selectedSite.getVersion());
+        //Button b = (Button) findViewById(R.id.site_update_start);
+        //b.setText(R.string.start_update);
 
     }
+	public SiteUpdateData getSiteUpdateData(SiteData site) {
+		SiteUpdateData su = new SiteUpdateData();
+		return su;
+	}
+	public void startUpdate() {
+		Log.v(Constants.LOG_TAG, "starting update for "+update.getName());
+	}
 }

@@ -26,4 +26,10 @@
 </TableRow>
 
 
+<Button 
+	android:text="@+id/Start" 
+	android:id="@+id/site_update_start" 
+	android:layout_width="wrap_content" 
+	android:layout_height="wrap_content"
+	android:onClick="startUpdate" ></Button>
 </TableLayout>
