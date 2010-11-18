@@ -15,6 +15,8 @@ import java.util.Vector;
 import org.geoplicity.mobile.util.Logger;
 import org.geoplicity.mobile.util.Property;
 
+import android.util.Log;
+
 public class SiteListCreator extends Properties {
 	
 	static final long serialVersionUID = 1L;
@@ -24,7 +26,7 @@ public class SiteListCreator extends Properties {
 	@SuppressWarnings("unchecked")
 	public List<String> getSiteChoices() throws NoSitePropsException{
 		List<String> sites = new Vector<String>();
-		File sitesFile = new File(Constants.GEOPLICITY_SDCARD_ROOT+Constants.DEFAULT_SITE_PROPERTIES);
+		File sitesFile = new File(Constants.SDCARD_ROOT+Property.getProperty(Constants.PROPERTY_APP_ROOT_DIR)+"/"+Constants.DEFAULT_SITE_PROPERTIES);
 		try {
 			FileInputStream fis = new FileInputStream(sitesFile);
 			load(fis);
