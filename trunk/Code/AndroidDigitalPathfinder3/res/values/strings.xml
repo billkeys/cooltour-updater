@@ -13,4 +13,8 @@
 	<color name="red">#ff0000</color>
 	<string name="menu_about">About Digital PathFinder</string>
 	<string name="updater">Site Updater</string>
+	<string name="start_update">Start</string>
+	<string name="pause_update">Pause</string>
+	<string name="cancel_update">Cancel</string>
+	<string name="resume_update">Resume</string>
 </resources>
