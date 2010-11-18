@@ -3,33 +3,75 @@
 	android:layout_width="fill_parent" 
 	android:layout_height="fill_parent" 
 	xmlns:android="http://schemas.android.com/apk/res/android">
-<TableRow android:id="@+id/SiteUpdateHeader" 
+<TableRow android:id="@+id/site_update_details_name_row" 
 	android:layout_width="wrap_content" 
 	android:layout_height="wrap_content">
-	<TextView android:id="@+id/SiteName" 
+	<TextView
+		android:text="Name"  
+		android:id="@+id/site_update_details_name"
+		android:textSize="20sp" 
+		android:textColor="#FFFFFF"
+		android:textStyle="bold"
 		android:layout_width="wrap_content" 
 		android:layout_height="wrap_content">
 	</TextView>	
 </TableRow>
-<TableRow android:id="@+id/SiteUpdateDetails" 
+<TableRow android:id="@+id/site_update_details_version_row" 
 	android:layout_width="wrap_content" 
 	android:layout_height="wrap_content">
-	<TextView android:id="@+id/SiteUpdateVersion" 
+	<TextView 
+		android:text="Version:"  
 		android:layout_width="wrap_content" 
 		android:layout_height="wrap_content">
 	</TextView>
-	<TextView android:id="@+id/SiteUpdateSize" 
+	<TextView 
+		android:text="version"  
+		android:id="@+id/site_update_details_version" 
+		android:layout_width="wrap_content" 
+		android:layout_height="wrap_content">
+	</TextView>
+</TableRow>
+<TableRow android:id="@+id/site_update_details_blocks_row" 
+	android:layout_width="wrap_content" 
+	android:layout_height="wrap_content">
+	<TextView 
+		android:text="Files:"  
+		android:layout_width="wrap_content" 
+		android:layout_height="wrap_content">
+	</TextView>
+	<TextView
+		android:text="blocks" 
+		android:id="@+id/site_update_details_blocks" 
+		android:layout_width="wrap_content" 
+		android:layout_height="wrap_content">
+	</TextView>
+</TableRow>	
+<TableRow android:id="@+id/site_update_details_size_row" 
+	android:layout_width="wrap_content" 
+	android:layout_height="wrap_content">
+	<TextView 
+		android:text="Update Size:	"  
+		android:layout_width="wrap_content" 
+		android:layout_height="wrap_content">
+	</TextView>
+	<TextView 
+		android:text="size"
+		android:id="@+id/site_update_details_size" 
 		android:layout_width="wrap_content" 
 		android:layout_height="wrap_content">
 	</TextView>	
-		
+</TableRow>
+<TableRow android:id="@+id/site_update_details_button_row" 
+	android:layout_width="wrap_content" 
+	android:layout_height="wrap_content">
+	<Button 
+	android:text="Start" 
+	android:id="@+id/site_update_details_button" 
+	android:layout_width="wrap_content" 
+	android:layout_height="wrap_content"
+	android:onClick="startUpdate" ></Button>		
 </TableRow>
 
 
-<Button 
-	android:text="@+id/Start" 
-	android:id="@+id/site_update_start" 
-	android:layout_width="wrap_content" 
-	android:layout_height="wrap_content"
-	android:onClick="startUpdate" ></Button>
+
 </TableLayout>

@@ -17,8 +17,9 @@ import android.util.Log;
 public class SiteUpdateThread extends Thread {
 	public static final int MODE_START = 0; 
 	public static final int MODE_RESUME = 1;
-	public static final int MODE_UNPACK = 2;
-	public static final int MODE_CLEANUP = 3;
+	public static final int MODE_REASSEMBLE = 2;
+	public static final int MODE_UNPACK = 3;
+	public static final int MODE_CLEANUP = 4;
 	int mode;
 	int currentBlock = 1;
 	SiteUpdateData updateData; 
@@ -31,9 +32,11 @@ public class SiteUpdateThread extends Thread {
 		Log.v(Constants.LOG_TAG, "start run, mode="+mode);
 		switch (mode) {
 			case MODE_START:
-			
+				downloadBlocks(Constants.UPDATE_TEMP_DIR);
 			case MODE_RESUME:
 				
+			case MODE_REASSEMBLE:
+				//reassemble(Constants.UPDATE_TEMP_DIR);
 			case MODE_UNPACK:
 				
 			case MODE_CLEANUP:
@@ -45,16 +48,24 @@ public class SiteUpdateThread extends Thread {
 	private void downloadBlocks(String tmpDir) {
 		File dir = new File(tmpDir);
 		if (!dir.exists()) {
-			dir.mkdirs();
+			if (dir.mkdirs()) {
+				Log.v(Constants.LOG_TAG, dir+ "created");
+			}
+			else {
+				Log.e(Constants.LOG_TAG, "Failed to create "+dir);
+				return;
+			}
 		}
 		for(int i=currentBlock;i<=updateData.getBlockCount();i++){
-			downloadBlock(null, null);
+			String blockName = updateData.getName()+i;
+			downloadBlock(Constants.UPDATE_SERVER+updateData.getName()+"/"+updateData.getVersion()+"/"+blockName, tmpDir+blockName);
 		}
 
 	}
 	private void downloadBlock(String urlString, String saveTo){
 		try {
 			//for(int i=1;i<=Integer.parseInt(amount);i++){
+			Log.v(Constants.LOG_TAG, "fetching "+urlString);
 			URL url = new URL(urlString);
 			BufferedInputStream in = new BufferedInputStream(url.openStream());
 			
@@ -72,6 +83,10 @@ public class SiteUpdateThread extends Thread {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	private void reassemble(String tmpDir) {
+		//Blocker b = new Blocker();
+		Blocker.unblock(tmpDir+updateData.getName(), updateData.getBlockCount(), tmpDir+updateData.getName()+".zip");
 	}
 	/**
 	 * 

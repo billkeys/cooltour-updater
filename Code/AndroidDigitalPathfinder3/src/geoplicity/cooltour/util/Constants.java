@@ -16,6 +16,7 @@ public class Constants {
 	
 	//intent extras
 	public static final String INTENT_EXTRA_SITE_UPDATE = "geoplicity.cooltour.SITE_UPDATE";
+	public static final String INTENT_EXTRA_SITE_RUNNING_UPDATE = "geoplicity.cooltour.SITE_RUNNING_UPDATE";
 	
 	//default property files
 	public static final String DEFAULT_APP_PROPERTIES = "app-props.txt";
@@ -29,4 +30,10 @@ public class Constants {
 	//testing property
 	public static final int TEST_INTERVAL = 120;	//how many seconds the test case will run, 0 means indefinite
 	public static final String TEST_FILE = "/sdcard/test/log-2010-5-28.txt";
+	
+	//Update URL
+	public static final String UPDATE_SERVER = "http://brendondrew.com/geoplicity/sites/";
+	public static final String UPDATE_FILE_EXT = ".txt";
+	public static final String UPDATE_SITES_FILE = "sites"+UPDATE_FILE_EXT;
+	public static final String UPDATE_TEMP_DIR = "/sdcard/Geoplicity/.tmp/";
 }
