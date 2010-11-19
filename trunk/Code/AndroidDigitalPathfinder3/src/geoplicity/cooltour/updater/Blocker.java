@@ -1,6 +1,8 @@
 package geoplicity.cooltour.updater;
 import java.io.*;
 
+import android.util.Log;
+
 public class Blocker {
 
 	/**
@@ -51,7 +53,9 @@ public class Blocker {
 				fis.read(buffer);
 				fos.write(buffer);
 				fos.flush();
+				Log.v("Done","Current block done!");
 			}
+			Log.v("All done","Unblocker finished!");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
