@@ -96,7 +96,8 @@ public class SiteUpdateDetails extends Activity {
 	public SiteUpdateData getSiteUpdateData(SiteData site) {
 		if (site == null)
 			return null;
-		String siteUpdateProperties = Property.getProperty(Constants.PROPERTY_UPDATE_URL)+site.getName()+"/"+site.getVersion()+"/"+site.getName()+Constants.UPDATE_FILE_EXT; 
+		String siteUpdateProperties = Property.getProperty(Constants.PROPERTY_UPDATE_URL)+
+		site.getName()+"/"+site.getVersion()+"/"+site.getName()+Constants.UPDATE_FILE_EXT; 
 		SiteUpdateData su = null;
 		try {
 			su = new SiteUpdateData(siteUpdateProperties);
@@ -108,7 +109,7 @@ public class SiteUpdateDetails extends Activity {
 	public void startUpdate(View v) {
 
 		SiteUpdateManager mgr = SiteUpdateManager.getInstance();
-		mUpdateThread = mgr.getUpdate(mUpdate);
+		mUpdateThread = mgr.getUpdateThread(mUpdate);
 		mUpdateThread.start();
 		Log.v(Constants.LOG_TAG, "starteded update for "+mUpdate.getName());
 		//watchUpdate();

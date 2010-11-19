@@ -6,8 +6,11 @@ import geoplicity.cooltour.sites.Sites;
 import geoplicity.cooltour.ui.R;
 import geoplicity.cooltour.util.Constants;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Properties;
 
 import org.geoplicity.mobile.util.Property;
 
@@ -35,6 +38,8 @@ public class SiteList extends ListActivity {
 	protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         Log.v(Constants.LOG_TAG, "SiteList onCreate()");
+        Log.v(Constants.LOG_TAG, Property.dump());
+        //Property.loadProperties(Constants.DEFAULT_APP_PROPERTIES);
         ArrayList<SiteData> sites = getSites();
         mSiteListAdapter = new SiteListAdapter(this, R.layout.site_list_row, sites);
         setListAdapter(mSiteListAdapter);
@@ -42,7 +47,12 @@ public class SiteList extends ListActivity {
     public ArrayList<SiteData> getSites() {
     	
     	try {
+    		Sites localSites = new Sites();
+    		localSites.load(new FileInputStream(Constants.SDCARD_ROOT+
+    				Property.getProperty(Constants.PROPERTY_APP_ROOT_DIR)+"/"+
+    				Constants.DEFAULT_SITE_PROPERTIES));
 			Sites sites = new Sites(Property.getProperty(Constants.PROPERTY_UPDATE_URL)+Constants.UPDATE_SITES_FILE);
+			sites.putAll(localSites);
 			mSiteList = sites.getSites();
 		} catch (IOException e) {
 			Log.e(Constants.LOG_TAG, "Failed to get sites list from "+Property.getProperty(Constants.PROPERTY_UPDATE_URL), e);
@@ -67,4 +77,14 @@ public class SiteList extends ListActivity {
 		// TODO Auto-generated method stub
 		super.onPause();
 	}
+//	private void loadProperties() {
+//		Properties appProps = new Properties();
+//		try {
+//			appProps.load(new FileInputStream(Constants.DEFAULT_APP_PROPERTIES));
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//    	Property.loadProperties(Constants.DEFAULT_APP_PROPERTIES);
+//	}
 }
