@@ -28,7 +28,12 @@ public class SiteUpdateManager {
 			return ref;
 		}
 	}
-	public SiteUpdateThread getUpdate(SiteUpdateData upd) {
+	/**
+	 * 
+	 * @param upd
+	 * @return
+	 */
+	public SiteUpdateThread getUpdateThread(SiteUpdateData upd) {
 		if (updates.containsKey(upd.getName())) {
 			return updates.get(upd.getName());
 		}

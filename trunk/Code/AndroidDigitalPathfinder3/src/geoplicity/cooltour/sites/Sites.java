@@ -18,6 +18,10 @@ public class Sites extends RemoteProperties{
 		super(url);
 	}
 
+	public Sites() {
+		// TODO Auto-generated constructor stub
+	}
+
 	public ArrayList<SiteData> getSites() {
 		ArrayList<SiteData> sites = new ArrayList<SiteData>();
 		for (Object keyObj : keySet()) {
