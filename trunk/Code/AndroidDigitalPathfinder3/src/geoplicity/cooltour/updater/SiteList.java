@@ -9,6 +9,8 @@ import geoplicity.cooltour.util.Constants;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.geoplicity.mobile.util.Property;
+
 import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -40,10 +42,10 @@ public class SiteList extends ListActivity {
     public ArrayList<SiteData> getSites() {
     	
     	try {
-			Sites sites = new Sites(Constants.UPDATE_SERVER+Constants.UPDATE_SITES_FILE);
+			Sites sites = new Sites(Property.getProperty(Constants.PROPERTY_UPDATE_URL)+Constants.UPDATE_SITES_FILE);
 			mSiteList = sites.getSites();
 		} catch (IOException e) {
-			Log.e(Constants.LOG_TAG, "Failed to get sites list from "+Constants.UPDATE_SERVER, e);
+			Log.e(Constants.LOG_TAG, "Failed to get sites list from "+Property.getProperty(Constants.PROPERTY_UPDATE_URL), e);
 			mSiteList = new ArrayList<SiteData>();
 		}
         Log.v(Constants.LOG_TAG, "returing "+mSiteList.size()+" sites");
@@ -59,5 +61,10 @@ public class SiteList extends ListActivity {
 
 		i.putExtra(Constants.INTENT_EXTRA_SITE_UPDATE, position); // key/value pair, where key needs current package prefix.
 		startActivity(i); 
+	}
+	@Override
+	protected void onPause() {
+		// TODO Auto-generated method stub
+		super.onPause();
 	}
 }
