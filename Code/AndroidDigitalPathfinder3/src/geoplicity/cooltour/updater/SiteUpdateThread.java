@@ -33,15 +33,15 @@ public class SiteUpdateThread extends Thread {
 		Log.v(Constants.LOG_TAG, "start run, mode="+mode);
 		switch (mode) {
 			case MODE_START:
-				downloadBlocks(Constants.SDCARD_ROOT+"/Geoplicity/"+Constants.UPDATE_TEMP_DIR);
+				//downloadBlocks(Constants.SDCARD_ROOT+"/Geoplicity/"+Constants.UPDATE_TEMP_DIR);
 			case MODE_RESUME:
 				//TODO Implement 
 			case MODE_REASSEMBLE:
-				//reassemble(Constants.UPDATE_TEMP_DIR);
+				//reassemble(Constants.SDCARD_ROOT+"/Geoplicity/"+Constants.UPDATE_TEMP_DIR);
 			case MODE_UNPACK:
-				//unpack(Constants.UPDATE_TEMP_DIR, updateData.getName());
+				//unpack(Constants.SDCARD_ROOT+"/Geoplicity/"+Constants.UPDATE_TEMP_DIR, updateData.getName());
 			case MODE_CLEANUP:
-				//deleteTemp(Constants.UPDATE_TEMP_DIR);
+				//deleteTemp(Constants.SDCARD_ROOT+"/Geoplicity/"+Constants.UPDATE_TEMP_DIR);
 			case MODE_FINISH:
 				updateSiteProps();
 			default:
@@ -61,7 +61,8 @@ public class SiteUpdateThread extends Thread {
 		}
 		for(int i=updateData.getCurrentBlock();i<=updateData.getBlockCount();i++){
 			String blockName = updateData.getName()+i;
-			downloadBlock(Property.getProperty(Constants.PROPERTY_UPDATE_URL)+updateData.getName()+"/"+updateData.getVersion()+"/"+blockName, tmpDir+blockName);
+			downloadBlock(Constants.UPDATE_SERVER+updateData.getName()+"/"+updateData.getVersion()+"/"+blockName, tmpDir+blockName);
+			Log.v("done","Files DONE downloading!");
 		}
 
 	}
@@ -103,16 +104,19 @@ public class SiteUpdateThread extends Thread {
 			ZipInputStream zis = null;
 
 			FileInputStream fis = new FileInputStream(location+name+".zip");
+			Log.v("fis",location+name+".zip");
 			zis = new ZipInputStream(fis);
 
 			ZipEntry ze;
 
 			while ((ze = zis.getNextEntry()) != null) {
-				if (ze.getName().endsWith("/")) {
-					File dir = new File(Constants.SDCARD_ROOT + name + "/" + ze.getName());
+				if (ze.isDirectory()) {
+					File dir = new File(Constants.SDCARD_ROOT + "/Geoplicity/" + name + "/" + ze.getName());
+					Log.v("name",dir.toString());
 					dir.mkdirs();
 				} else {
-					File f = new File(Constants.SDCARD_ROOT + name + "/" + ze.getName());
+					File f = new File(Constants.SDCARD_ROOT + "/Geoplicity/" + name + "/" + ze.getName());
+					Log.v("file",f.toString());
 					f.createNewFile();
 					OutputStream out = new FileOutputStream(f);
 					int sz = 0;
