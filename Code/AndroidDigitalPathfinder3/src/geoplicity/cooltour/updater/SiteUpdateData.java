@@ -15,21 +15,20 @@ public class SiteUpdateData extends SiteData {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	//	long blockSize;
-//	int blocks;
-//	String fileFormat;
-//	long fileSize;
 	public static final String KEY_BLOCK_SIZE = "block_size";
 	public static final String KEY_BLOCK_COUNT = "num_blocks";
 	public static final String KEY_CHECKSUM = "checksum";
 	public static final String KEY_FILE_FORMAT = "file_format";
 	public static final String KEY_FILE_SIZE = "file_size";
-	int blocksDownloaded = 0;
-	public int getBlocksDownloaded() {
-		return blocksDownloaded;
+	int currentBlock = 1;
+	public int getCurrentBlock() {
+		return currentBlock;
 	}
-	public void setBlocksDownloaded(int blocksDownloaded) {
-		this.blocksDownloaded = blocksDownloaded;
+	public void setCurrentBlock(int blocksDownloaded) {
+		this.currentBlock = blocksDownloaded;
+	}
+	public void incrementCurrentBlock() {
+		this.currentBlock++;
 	}
 	public SiteUpdateData() {
 		super();

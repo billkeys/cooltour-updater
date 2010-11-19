@@ -44,7 +44,7 @@ public class SiteListAdapter<T> extends ArrayAdapter<SiteData> {
                         TextView tt = (TextView) v.findViewById(R.id.site_name);
                         TextView bt = (TextView) v.findViewById(R.id.site_status);
                         if (tt != null) {
-                              tt.setText("Name: "+site.getName());                            }
+                              tt.setText(site.getName());                            }
                         if(bt != null){
                               bt.setText("Version: "+ site.getVersion());
                         }

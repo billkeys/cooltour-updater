@@ -14,6 +14,8 @@ import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.geoplicity.mobile.util.Property;
+
 import android.util.Log;
 
 public class SiteUpdateThread extends Thread {
@@ -24,20 +26,16 @@ public class SiteUpdateThread extends Thread {
 	public static final int MODE_CLEANUP = 4;
 	public static final int MODE_FINISH = 5;
 	int mode;
-	int currentBlock = 1;
 	SiteUpdateData updateData; 
-	public SiteUpdateThread(SiteUpdateData update) {
-		updateData = update;
-		//currentBlock = updateData.get
-	}
+
 	@Override
 	public void run() {
 		Log.v(Constants.LOG_TAG, "start run, mode="+mode);
 		switch (mode) {
 			case MODE_START:
-				downloadBlocks(Constants.UPDATE_TEMP_DIR);
+				downloadBlocks(Constants.SDCARD_ROOT+"/Geoplicity/"+Constants.UPDATE_TEMP_DIR);
 			case MODE_RESUME:
-				
+				//TODO Implement 
 			case MODE_REASSEMBLE:
 				//reassemble(Constants.UPDATE_TEMP_DIR);
 			case MODE_UNPACK:
@@ -61,9 +59,9 @@ public class SiteUpdateThread extends Thread {
 				return;
 			}
 		}
-		for(int i=currentBlock;i<=updateData.getBlockCount();i++){
+		for(int i=updateData.getCurrentBlock();i<=updateData.getBlockCount();i++){
 			String blockName = updateData.getName()+i;
-			downloadBlock(Constants.UPDATE_SERVER+updateData.getName()+"/"+updateData.getVersion()+"/"+blockName, tmpDir+blockName);
+			downloadBlock(Property.getProperty(Constants.PROPERTY_UPDATE_URL)+updateData.getName()+"/"+updateData.getVersion()+"/"+blockName, tmpDir+blockName);
 		}
 
 	}
@@ -71,6 +69,7 @@ public class SiteUpdateThread extends Thread {
 		try {
 			//for(int i=1;i<=Integer.parseInt(amount);i++){
 			Log.v(Constants.LOG_TAG, "fetching "+urlString);
+			//sleep(3000);
 			URL url = new URL(urlString);
 			BufferedInputStream in = new BufferedInputStream(url.openStream());
 			
@@ -84,6 +83,7 @@ public class SiteUpdateThread extends Thread {
 			}
 			bout.close();
 			in.close();
+			updateData.incrementCurrentBlock();
 			//}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -159,16 +159,44 @@ public class SiteUpdateThread extends Thread {
 				else {
 					Log.v(Constants.LOG_TAG,"Created "+sites);
 				}
-				Properties sitesProps = new Properties();
-				sitesProps.load(new FileInputStream(sites));
-				sitesProps.setProperty(updateData.getName(), updateData.getVersion());
-				sitesProps.save(new FileOutputStream(sites), "Updated "+updateData.getName());
 			} catch (IOException e) {
-				Log.e(Constants.LOG_TAG, "Failed to update"+sites, e);
+				Log.e(Constants.LOG_TAG, "Failed to create"+sites, e);
 				return false;
 			}
 		}
+		try {
+			Properties sitesProps = new Properties();
+			sitesProps.load(new FileInputStream(sites));
+			sitesProps.setProperty(updateData.getName(), updateData.getVersion());
+			sitesProps.save(new FileOutputStream(sites), "Updated "+updateData.getName());
+			Log.v(Constants.LOG_TAG,"updated "+sites);
+		} catch (IOException e) {
+			Log.e(Constants.LOG_TAG, "Failed to save"+sites, e);
+			return false;
+		}
+		
 		return true;
 
+	}
+	public SiteUpdateData getUpdateData() {
+		return updateData;
+	}
+	public void setUpdateData(SiteUpdateData updateData) {
+		this.updateData = updateData;
+	}
+	public SiteUpdateThread(SiteUpdateData update) {
+		updateData = update;
+	}
+	/**
+	 * 
+	 */
+	public void pause() {
+		//TODO Implement
+	}
+	/**
+	 * 
+	 */
+	public void cancel() {
+		//TODO Implement
 	}
 }

@@ -1,10 +1,13 @@
 package geoplicity.cooltour.updater;
 
+import geoplicity.cooltour.sites.SiteData;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class SiteUpdateManager {
 	static SiteUpdateManager ref;
+	Map<String,SiteData> sites;
 	Map<String,SiteUpdateThread> updates;
 	/**
 	 * @param args
@@ -15,6 +18,7 @@ public class SiteUpdateManager {
 	}
 	private SiteUpdateManager() {
 		updates = new HashMap<String,SiteUpdateThread>();
+		sites = new  HashMap<String,SiteData>();
 	}
 	public static SiteUpdateManager getInstance() {
 		if (ref == null) {

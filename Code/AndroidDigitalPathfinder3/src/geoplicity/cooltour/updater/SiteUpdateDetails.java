@@ -6,6 +6,8 @@ import geoplicity.cooltour.util.Constants;
 
 import java.io.IOException;
 
+import org.geoplicity.mobile.util.Property;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -42,6 +44,8 @@ public class SiteUpdateDetails extends Activity {
 	//Menu item for launching "About Geoplicity" Activity
 	private static final int ABOUT_ID = Menu.FIRST + 1;     
 	static SiteUpdateData mUpdate;
+	static SiteUpdateThread mUpdateThread;
+	private viewThread vt;
 	protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         Log.v(Constants.LOG_TAG, "SiteUpdateDetails onCreate()");
@@ -83,10 +87,7 @@ public class SiteUpdateDetails extends Activity {
         else if (extras.get(Constants.INTENT_EXTRA_SITE_RUNNING_UPDATE) != null) {
         	Log.v(Constants.LOG_TAG, mUpdate.toString());
 
-        	watchUpdate();
 
-//            Button b = (Button) findViewById(R.id.site_update_details_button);
-//           	b.setText(R.string.start_update);
         }
         
 
@@ -95,7 +96,7 @@ public class SiteUpdateDetails extends Activity {
 	public SiteUpdateData getSiteUpdateData(SiteData site) {
 		if (site == null)
 			return null;
-		String siteUpdateProperties = Constants.UPDATE_SERVER+site.getName()+"/"+site.getVersion()+"/"+site.getName()+Constants.UPDATE_FILE_EXT; 
+		String siteUpdateProperties = Property.getProperty(Constants.PROPERTY_UPDATE_URL)+site.getName()+"/"+site.getVersion()+"/"+site.getName()+Constants.UPDATE_FILE_EXT; 
 		SiteUpdateData su = null;
 		try {
 			su = new SiteUpdateData(siteUpdateProperties);
@@ -107,28 +108,58 @@ public class SiteUpdateDetails extends Activity {
 	public void startUpdate(View v) {
 
 		SiteUpdateManager mgr = SiteUpdateManager.getInstance();
-		SiteUpdateThread updateThread = mgr.getUpdate(mUpdate);
-		updateThread.start();
+		mUpdateThread = mgr.getUpdate(mUpdate);
+		mUpdateThread.start();
 		Log.v(Constants.LOG_TAG, "starteded update for "+mUpdate.getName());
-		watchUpdate();
-//	    Intent intent = new Intent(Constants.INTENT_ACTION_LAUNCH_SITE_UPDATE);
-//	    intent.putExtra(Constants.INTENT_EXTRA_SITE_RUNNING_UPDATE, mUpdate);
-//	    startActivity(intent);
+		//watchUpdate();
+		vt = new viewThread();
+		vt.start();
 		
 	}
-	private void watchUpdate() {
+	private void updateView (SiteUpdateThread updtProc) {
+		//Log.v(Constants.LOG_TAG," "+mUpdate.getName()+" updating view");
         setContentView(R.layout.site_update_in_progress_details);
-    	SiteUpdateManager mgr = SiteUpdateManager.getInstance();
-    	SiteUpdateThread updtProc = mgr.getUpdate(mUpdate);
+        onContentChanged();
         TextView name = (TextView) findViewById(R.id.site_update_details_name);
         name.setText(mUpdate.getName());
         TextView statusText = (TextView) findViewById(R.id.site_update_status);
-    	statusText.setText("In Progess");
-    	while (updtProc.isAlive()) {
-    		Log.v(Constants.LOG_TAG," "+mUpdate.getName()+" still alive");
-    	}
-    	statusText.setText("Complete!");
+      
+        if (updtProc.isAlive()) {
+        	statusText.setText("In Progress");        	
+        }
+        else {
+        	statusText.setText("Comlpeted!");
+        }
+        
+
 	}
+	protected class viewThread extends Thread {
+		public viewThread() {
+		}
+		@Override
+		public void run() {	
+			while (true) {
+				try{
+					sleep(2000);
+					handler.sendEmptyMessage(0);
+				}
+				catch(InterruptedException e) {
+					//Log.v(TAG,"Thread Insomnia");
+				}
+			}
+		}
+	}
+    private Handler handler = new Handler() {
+
+        @Override
+
+        public void handleMessage(Message msg) {
+    		//Log.v(Constants.LOG_TAG,"handleMessage()->");
+    		updateView(mUpdateThread);
+    		//Log.v(Constants.LOG_TAG,"<-handleMessage()");
+        }
+
+    };
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
@@ -171,4 +202,10 @@ public class SiteUpdateDetails extends Activity {
 	        }
 	    }
 	};
+	@Override
+	protected void onPause() {
+		// TODO Auto-generated method stub
+		super.onPause();
+		vt.stop();
+	}
 }
