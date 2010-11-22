@@ -35,8 +35,8 @@ public class Constants {
 	
 	//Updater Constats
 	public static final String SDCARD_ROOT = "/sdcard";
-	public static final String UPDATE_SERVER = "http://brendondrew.com/geoplicity/sites/";
-	//public static final String UPDATE_SERVER = "http://reachforthestarsmcc.com/sdodge/files/sites/";
+	//public static final String UPDATE_SERVER = "http://brendondrew.com/geoplicity/sites/";
+	public static final String UPDATE_SERVER = "http://reachforthestarsmcc.com/sdodge/files/sites/";
 	public static final String UPDATE_FILE_EXT = ".txt";
 	public static final String UPDATE_SITES_FILE = "sites"+UPDATE_FILE_EXT;
 	public static final String UPDATE_TEMP_DIR = ".tmp/";

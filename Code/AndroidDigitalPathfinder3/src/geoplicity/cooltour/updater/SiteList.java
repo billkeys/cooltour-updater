@@ -38,7 +38,7 @@ public class SiteList extends ListActivity {
 	protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         Log.v(Constants.LOG_TAG, "SiteList onCreate()");
-        Log.v(Constants.LOG_TAG, Property.dump());
+        //Log.v(Constants.LOG_TAG, Property.dump());
         //Property.loadProperties(Constants.DEFAULT_APP_PROPERTIES);
         ArrayList<SiteData> sites = getSites();
         mSiteListAdapter = new SiteListAdapter(this, R.layout.site_list_row, sites);
@@ -49,13 +49,14 @@ public class SiteList extends ListActivity {
     	try {
     		Sites localSites = new Sites();
     		localSites.load(new FileInputStream(Constants.SDCARD_ROOT+
-    				Property.getProperty(Constants.PROPERTY_APP_ROOT_DIR)+"/"+
+    				"/Geoplicity"+"/"+
     				Constants.DEFAULT_SITE_PROPERTIES));
-			Sites sites = new Sites(Property.getProperty(Constants.PROPERTY_UPDATE_URL)+Constants.UPDATE_SITES_FILE);
+    		Sites sites = new Sites(Constants.UPDATE_SERVER+Constants.UPDATE_SITES_FILE);
 			sites.putAll(localSites);
 			mSiteList = sites.getSites();
 		} catch (IOException e) {
-			Log.e(Constants.LOG_TAG, "Failed to get sites list from "+Property.getProperty(Constants.PROPERTY_UPDATE_URL), e);
+			//Log.e(Constants.LOG_TAG, "Failed to get sites list from "+Property.getProperty(Constants.PROPERTY_UPDATE_URL), e);
+			Log.e(Constants.LOG_TAG, "Failed to get sites list from "+Constants.UPDATE_SERVER, e);
 			mSiteList = new ArrayList<SiteData>();
 		}
         Log.v(Constants.LOG_TAG, "returing "+mSiteList.size()+" sites");
