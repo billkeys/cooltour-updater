@@ -96,7 +96,7 @@ public class SiteUpdateDetails extends Activity {
 	public SiteUpdateData getSiteUpdateData(SiteData site) {
 		if (site == null)
 			return null;
-		String siteUpdateProperties = Property.getProperty(Constants.PROPERTY_UPDATE_URL)+
+		String siteUpdateProperties = Constants.UPDATE_SERVER+
 		site.getName()+"/"+site.getVersion()+"/"+site.getName()+Constants.UPDATE_FILE_EXT; 
 		SiteUpdateData su = null;
 		try {

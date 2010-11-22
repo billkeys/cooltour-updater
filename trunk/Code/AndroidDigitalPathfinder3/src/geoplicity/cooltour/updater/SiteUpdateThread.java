@@ -62,7 +62,7 @@ public class SiteUpdateThread extends Thread {
 		for(int i=updateData.getCurrentBlock();i<=updateData.getBlockCount();i++){
 			String blockName = updateData.getName()+i;
 			downloadBlock(Constants.UPDATE_SERVER+updateData.getName()+"/"+updateData.getVersion()+"/"+blockName, tmpDir+blockName);
-			Log.v("done","Files DONE downloading!");
+			Log.v(Constants.LOG_TAG,"Files done downloading");
 		}
 
 	}
@@ -104,20 +104,22 @@ public class SiteUpdateThread extends Thread {
 			ZipInputStream zis = null;
 
 			FileInputStream fis = new FileInputStream(location+name+".zip");
-			Log.v("fis",location+name+".zip");
 			zis = new ZipInputStream(fis);
 
 			ZipEntry ze;
+			
+			File mainDir = new File(Constants.SDCARD_ROOT+"/Geoplicity/"+name+"/");
+			mainDir.mkdirs();
 
 			while ((ze = zis.getNextEntry()) != null) {
 				if (ze.isDirectory()) {
 					File dir = new File(Constants.SDCARD_ROOT + "/Geoplicity/" + name + "/" + ze.getName());
-					Log.v("name",dir.toString());
 					dir.mkdirs();
+					Log.v(Constants.LOG_TAG,dir.toString()+" created");
 				} else {
 					File f = new File(Constants.SDCARD_ROOT + "/Geoplicity/" + name + "/" + ze.getName());
-					Log.v("file",f.toString());
 					f.createNewFile();
+					Log.v(Constants.LOG_TAG,f.toString()+" created");
 					OutputStream out = new FileOutputStream(f);
 					int sz = 0;
 					byte[] buf = new byte[1024];
@@ -127,6 +129,7 @@ public class SiteUpdateThread extends Thread {
 						out.write(buf, 0, n);
 					}
 				}
+				Log.v(Constants.LOG_TAG,"Done unpacking");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -142,14 +145,15 @@ public class SiteUpdateThread extends Thread {
 		if (path.exists()) {
 			File[] files = path.listFiles();
 			for (int i = 0; i < files.length; i++) {
-				System.out.println(files[i]);
 				if (files[i].isDirectory()) {
 					deleteTemp(files[i].toString());
 				} else {
+					Log.v(Constants.LOG_TAG,"Deleting "+files[i].toString());
 					files[i].delete();
 				}
 			}
 		}
+		Log.v(Constants.LOG_TAG,"Deleting "+path.toString());
 		return (path.delete());
 	}
 	private boolean updateSiteProps() {
