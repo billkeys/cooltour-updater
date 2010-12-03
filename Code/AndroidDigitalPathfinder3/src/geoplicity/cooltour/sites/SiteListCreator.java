@@ -43,7 +43,7 @@ public class SiteListCreator extends Properties {
 		String rootDir = Property.getProperty(Constants.PROPERTY_APP_ROOT_DIR); 
 		try {
 			FileInputStream fis = new FileInputStream(new File(STORAGE_DEVICE+
-					"/"+Constants.DEFAULT_SITE_PROPERTIES));
+					"/"+rootDir+"/"+Constants.DEFAULT_SITE_PROPERTIES));
 			load(fis);
 			fis.close();
 			Set siteList = keySet();
