@@ -39,7 +39,7 @@ public class SiteList extends ListActivity {
         super.onCreate(savedInstanceState);
         Log.v(Constants.LOG_TAG, "SiteList onCreate()");
         //Log.v(Constants.LOG_TAG, Property.dump());
-        //Property.loadProperties(Constants.DEFAULT_APP_PROPERTIES);
+        Property.loadProperties(Constants.DEFAULT_APP_PROPERTIES);
         ArrayList<SiteData> sites = getSites();
         mSiteListAdapter = new SiteListAdapter(this, R.layout.site_list_row, sites);
         setListAdapter(mSiteListAdapter);
