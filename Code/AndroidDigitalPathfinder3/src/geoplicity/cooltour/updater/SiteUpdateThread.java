@@ -33,15 +33,16 @@ public class SiteUpdateThread extends Thread {
 		Log.v(Constants.LOG_TAG, "start run, mode="+mode);
 		switch (mode) {
 			case MODE_START:
-				//downloadBlocks(Constants.SDCARD_ROOT+"/Geoplicity/"+Constants.UPDATE_TEMP_DIR);
+				downloadBlocks(Constants.SDCARD_ROOT+"/Geoplicity/"+Constants.UPDATE_TEMP_DIR);
 			case MODE_RESUME:
 				//TODO Implement 
+				Log.v("Current block",Integer.toString(updateData.getCurrentBlock()));
 			case MODE_REASSEMBLE:
-				//reassemble(Constants.SDCARD_ROOT+"/Geoplicity/"+Constants.UPDATE_TEMP_DIR);
+				reassemble(Constants.SDCARD_ROOT+"/Geoplicity/"+Constants.UPDATE_TEMP_DIR);
 			case MODE_UNPACK:
-				//unpack(Constants.SDCARD_ROOT+"/Geoplicity/"+Constants.UPDATE_TEMP_DIR, updateData.getName());
+				unpack(Constants.SDCARD_ROOT+"/Geoplicity/"+Constants.UPDATE_TEMP_DIR, updateData.getName());
 			case MODE_CLEANUP:
-				//deleteTemp(Constants.SDCARD_ROOT+"/Geoplicity/"+Constants.UPDATE_TEMP_DIR);
+				deleteTemp(Constants.SDCARD_ROOT+"/Geoplicity/"+Constants.UPDATE_TEMP_DIR);
 			case MODE_FINISH:
 				updateSiteProps();
 			default:
