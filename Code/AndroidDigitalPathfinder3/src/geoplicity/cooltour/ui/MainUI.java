@@ -6,6 +6,7 @@
 package geoplicity.cooltour.ui;
 
 import geoplicity.cooltour.sites.NoSitePropsException;
+import geoplicity.cooltour.sites.NoWayPropsException;
 import geoplicity.cooltour.sites.SiteListCreator;
 import geoplicity.cooltour.sites.TourListCreator;
 import geoplicity.cooltour.util.Constants;
@@ -64,6 +65,8 @@ public class MainUI extends Activity {
 	private String m_RootDir;
 	//Current Site Selection
 	private String m_SelectedSite;
+	//Current Tour Selection
+	private String m_TourSelection;
 	
 	
     @Override
@@ -186,7 +189,7 @@ public class MainUI extends Activity {
      */
     private void loadApplicationProperties(){   
     	Property.loadProperties(Constants.DEFAULT_APP_PROPERTIES);
-    	m_RootDir = Property.getProperty("app.root.dir");   
+    	m_RootDir = Property.getProperty(Constants.PROPERTY_APP_ROOT_DIR);   
         displaySiteSpecificProperties();
     }
     
@@ -199,16 +202,17 @@ public class MainUI extends Activity {
      * Loads the site specific properties 
      *                               <Typical Location>
      *    - GEO Properties      --> /Geoplicity/site_selected/geo-props.txt
-     *    - MAP Properties      --> /Geoplicity/site_selected/config/map-props.txt
-     *    - WAY Properties      --> /Geoplicity/site_selected/config/way-props.txt
-     *    - TRI Properties      --> /Geoplicity/site_selected/config/tri-props.txt
-     *    - GPS Properties      --> /Geoplicity/site_selected/config/nmea.txt
+     *    - MAP Properties      --> /Geoplicity/site_selected/configs/map-props.txt
+     *    - WAY Properties      --> /Geoplicity/site_selected/configs/way-props.txt
+     *    - TRI Properties      --> /Geoplicity/site_selected/configs/tri-props.txt
+     *    - GPS Properties      --> /Geoplicity/site_selected/configs/nmea.txt
      */
     private void loadSiteSpecificProperties() {
     	if (m_StartAtBegin.isChecked())
     		Property.setProperty("tour.sequence.enabled", "true");
     	else
     		Property.setProperty("tour.sequence.enabled", "false");
+    	Property.setProperty("tour.current", m_TourSelection);
     	Property.loadProperties(m_RootDir + "/" + m_SelectedSite + Constants.DEFAULT_GEO_PROPERTIES);
     	Log.v("LOAD SITE PROPERTIES", m_RootDir + "/" + m_SelectedSite + Constants.DEFAULT_GEO_PROPERTIES);
     	Logger.init();	
@@ -234,11 +238,11 @@ public class MainUI extends Activity {
 
         public void onItemSelected(AdapterView<?> parent,
             View view, int pos, long id) {
-        	String tourSelected = parent.getItemAtPosition(pos).toString();
-        	if(tourSelected != null)
+        	m_TourSelection = parent.getItemAtPosition(pos).toString();
+        	if(m_TourSelection != null)
         	{
         		Toast.makeText(parent.getContext(), "The tour selected is " +
-        			tourSelected+"\n" + m_TourList.get(tourSelected), Toast.LENGTH_LONG).show();
+        			m_TourSelection+"\n" + m_TourList.get(m_TourSelection), Toast.LENGTH_LONG).show();
         	}
         }
 
@@ -269,7 +273,7 @@ public class MainUI extends Activity {
     				m_TourSelectionAdapter.add(tourListIterator.next());
     			}
         	}
-        	catch (NoSitePropsException loadDefault){
+        	catch (NoWayPropsException loadDefault){
         		//TODO:
         		//Just display single site Staatsburg.
         	}
