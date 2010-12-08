@@ -21,15 +21,11 @@ public class SiteUpdateData extends SiteData {
 	public static final String KEY_FILE_FORMAT = "file_format";
 	public static final String KEY_FILE_SIZE = "file_size";
 	int currentBlock = 1;
-	public int getCurrentBlock() {
-		return currentBlock;
-	}
-	public void setCurrentBlock(int blocksDownloaded) {
-		this.currentBlock = blocksDownloaded;
-	}
-	public void incrementCurrentBlock() {
-		this.currentBlock++;
-	}
+	int currentMode = 0;
+	boolean updateStarted;
+	boolean updateInProgress;
+	boolean updateComplete;
+	String resultMessage;
 	public SiteUpdateData() {
 		super();
 	}
@@ -65,4 +61,44 @@ public class SiteUpdateData extends SiteData {
 	public void setFileSize(long fileSize) {
 		setProperty(KEY_FILE_SIZE, fileSize+"");
 	}
+	public boolean isUpdateInProgress() {
+		return updateInProgress;
+	}
+	public void setUpdateInProgress(boolean updateStarted) {
+		this.updateInProgress = updateStarted;
+	}
+	public int getCurrentBlock() {
+		return currentBlock;
+	}
+	public void setCurrentBlock(int blocksDownloaded) {
+		this.currentBlock = blocksDownloaded;
+	}
+	public void incrementCurrentBlock() {
+		this.currentBlock++;
+	}
+	public boolean isUpdateComplete() {
+		return updateComplete;
+	}
+	public void setUpdateComplete(boolean updateComplete) {
+		this.updateComplete = updateComplete;
+	}
+	public String getResultMessage() {
+		return resultMessage;
+	}
+	public void setResultMessage(String resultMessage) {
+		this.resultMessage = resultMessage;
+	}
+	public boolean hasUpdateStarted() {
+		return updateStarted;
+	}
+	public void setUpdateStarted(boolean updateStarted) {
+		this.updateStarted = updateStarted;
+	}
+	public int getCurrentMode() {
+		return currentMode;
+	}
+	public void setCurrentMode(int currentMode) {
+		this.currentMode = currentMode;
+	}
+
 }
