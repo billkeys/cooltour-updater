@@ -6,8 +6,6 @@ import geoplicity.cooltour.util.Constants;
 
 import java.io.IOException;
 
-import org.geoplicity.mobile.util.Property;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -46,121 +44,159 @@ public class SiteUpdateDetails extends Activity {
 	static SiteUpdateData mUpdate;
 	static SiteUpdateThread mUpdateThread;
 	private viewThread vt;
+	/**
+	 * 
+	 */
 	protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-        Log.v(Constants.LOG_TAG, "SiteUpdateDetails onCreate()");
-        SiteData selectedSite = null;
-        Intent i = getIntent();
-        Bundle extras = i.getExtras();
-        if (extras.get(Constants.INTENT_EXTRA_SITE_UPDATE) != null) {
-        	Log.v(Constants.LOG_TAG, extras.get(Constants.INTENT_EXTRA_SITE_UPDATE).toString());
-        	//selectedSite = (SiteData) extras.get(Constants.INTENT_EXTRA_SITE_UPDATE);
-        	Integer selectedSiteIndex = (Integer) extras.get(Constants.INTENT_EXTRA_SITE_UPDATE);
-        	selectedSite = SiteList.mSiteList.get(selectedSiteIndex);
-            mUpdate = getSiteUpdateData(selectedSite);
-
-            if (mUpdate != null) {
-            	Log.v(Constants.LOG_TAG, mUpdate.toString());
-                setContentView(R.layout.site_update_details);
-                TextView name = (TextView) findViewById(R.id.site_update_details_name);
-                name.setText(mUpdate.getName());
-                TextView version = (TextView) findViewById(R.id.site_update_details_version);
-                version.setText(mUpdate.getVersion());
-                TextView blocks = (TextView) findViewById(R.id.site_update_details_blocks);
-                blocks.setText(mUpdate.getBlockCount()+"");
-
-                TextView size = (TextView) findViewById(R.id.site_update_details_size);
-                size.setText(mUpdate.getFileSize()+"");
-                Button b = (Button) findViewById(R.id.site_update_details_button);
-               	b.setText(R.string.start_update);
-                
-
-            }
-            else {    
-                AlertDialog.Builder diag =  new AlertDialog.Builder(this);
-            	diag.setMessage("Failed to get site data");
-            	diag.setPositiveButton("Try Again", null);
-            	diag.setNegativeButton("Cancel", null);
-            	diag.show();
-            }
-        }
-        else if (extras.get(Constants.INTENT_EXTRA_SITE_RUNNING_UPDATE) != null) {
-        	Log.v(Constants.LOG_TAG, mUpdate.toString());
-
-
-        }
-        
-
+        Log.d(Constants.LOG_TAG, "SiteUpdateDetails onCreate()");
 
     }
+	/**
+	 * Get the site update data.  If the thread hasn't started, 
+	 * retrieve the data from the server otherwise get it from 
+	 * the thread.
+	 * @param site
+	 * @return
+	 */
 	public SiteUpdateData getSiteUpdateData(SiteData site) {
+		Log.d(Constants.LOG_TAG, "SiteUpdateDetails getSiteUpdateData()");
 		if (site == null)
 			return null;
-		String siteUpdateProperties = Constants.UPDATE_SERVER+
-		site.getName()+"/"+site.getVersion()+"/"+site.getName()+Constants.UPDATE_FILE_EXT; 
 		SiteUpdateData su = null;
-		try {
-			su = new SiteUpdateData(siteUpdateProperties);
-		} catch (IOException e) {
-			Log.v(Constants.LOG_TAG, "Failed to get site update data", e);
+		if (SiteUpdateManager.getInstance().containsUpdate(site.getName())) {
+			su = SiteUpdateManager.getInstance().getUpdateThread(site.getName()).getUpdateData();
+		}
+		else {
+			String siteUpdateProperties = Constants.UPDATE_SERVER+
+			site.getName()+"/"+site.getVersion()+"/"+site.getName()+Constants.UPDATE_FILE_EXT; 
+
+			try {
+				su = new SiteUpdateData(siteUpdateProperties);
+			} catch (IOException e) {
+				Log.e(Constants.LOG_TAG, "Failed to get site update data", e);
+			}
 		}
 		return su;
 	}
+	/**
+	 * Invoked when pressing the start
+	 * @param v
+	 */
 	public void startUpdate(View v) {
+		SiteUpdateManager.getInstance().startUpdate(mUpdate);
+		startViewUpdater();
+	}
+	/**
+	 * Invoked when presses the pause button
+	 * @param v
+	 */
+	public void pauseUpdate(View v) {
+		Log.v(Constants.LOG_TAG," pausing update "+mUpdate.getName()+"");
+		SiteUpdateThread upd = SiteUpdateManager.getInstance().getUpdateThread(mUpdate);
+		upd.interrupt();
+	}
+	/**
+	 * 
+	 * @param v
+	 */
+	public void cancelUpdate(View v) {
+		Log.v(Constants.LOG_TAG," cancelling update "+mUpdate.getName()+"");
+		SiteUpdateThread upd = SiteUpdateManager.getInstance().getUpdateThread(mUpdate);
+		upd.interrupt();
+		//TODO cleanup temp files.
+	}
 
-		SiteUpdateManager mgr = SiteUpdateManager.getInstance();
-		mUpdateThread = mgr.getUpdateThread(mUpdate);
-		mUpdateThread.start();
-		Log.v(Constants.LOG_TAG, "starteded update for "+mUpdate.getName());
-		//watchUpdate();
+	private void startViewUpdater() {
 		vt = new viewThread();
 		vt.start();
-		
-	}
-	private void updateView (SiteUpdateThread updtProc) {
-		//Log.v(Constants.LOG_TAG," "+mUpdate.getName()+" updating view");
-        setContentView(R.layout.site_update_in_progress_details);
-        onContentChanged();
-        TextView name = (TextView) findViewById(R.id.site_update_details_name);
-        name.setText(mUpdate.getName());
-        TextView statusText = (TextView) findViewById(R.id.site_update_status);
-      
-        if (updtProc.isAlive()) {
-        	statusText.setText("In Progress");        	
-        }
-        else {
-        	statusText.setText("Comlpeted!");
-        }
-        
 
 	}
+	private void updateView () {
+		Log.v(Constants.LOG_TAG," "+mUpdate.toString());
+		if (mUpdate.isUpdateComplete()) {
+            setContentView(R.layout.site_update_complete);
+
+            TextView name = (TextView) findViewById(R.id.site_update_details_name);
+            name.setText(mUpdate.getName());
+            TextView statusText = (TextView) findViewById(R.id.site_update_status);
+        	statusText.setText("Comlpeted!");
+        	vt.stop();
+		}
+		else if (mUpdate.isUpdateInProgress()) {
+            setContentView(R.layout.site_update_in_progress_details);
+
+            TextView name = (TextView) findViewById(R.id.site_update_details_name);
+            name.setText(mUpdate.getName());
+
+            TextView statusText = (TextView) findViewById(R.id.site_update_status);
+        	statusText.setText("In Progress");
+        	
+            TextView blocks = (TextView) findViewById(R.id.site_update_block_count);
+            blocks.setText(Integer.toString(mUpdate.getCurrentBlock()));
+        }
+        else {
+            setContentView(R.layout.site_update_details);
+            TextView name = (TextView) findViewById(R.id.site_update_details_name);
+            name.setText(mUpdate.getName());
+            TextView version = (TextView) findViewById(R.id.site_update_details_version);
+            version.setText(mUpdate.getVersion());
+            TextView blocks = (TextView) findViewById(R.id.site_update_details_blocks);
+            blocks.setText(mUpdate.getBlockCount()+"");
+            TextView size = (TextView) findViewById(R.id.site_update_details_size);
+            size.setText(mUpdate.getFileSize()+"");
+            Button b = (Button) findViewById(R.id.site_update_details_button);
+            if (mUpdate.hasUpdateStarted()) {
+            	b.setText(R.string.resume_update);
+            }
+            else {
+            	b.setText(R.string.start_update);
+            }
+           	
+           	if (vt != null) {
+           		vt.stop();
+           	}
+        }
+        onContentChanged();
+
+	}
+	/**
+	 * Thread for updating this activities view.
+	 * @author Brendon Drew (b.j.drew@gmail.com)
+	 *
+	 */
 	protected class viewThread extends Thread {
 		public viewThread() {
 		}
 		@Override
-		public void run() {	
-			while (true) {
+		public void run() {
+			//Only 
+			while (mUpdate.isUpdateInProgress()) {
 				try{
-					sleep(2000);
+					sleep(500);
 					handler.sendEmptyMessage(0);
 				}
 				catch(InterruptedException e) {
 					//Log.v(TAG,"Thread Insomnia");
 				}
 			}
+			Log.d(Constants.LOG_TAG,"viewThread terminating");
 		}
 	}
+	/**
+	 * 
+	 */
     private Handler handler = new Handler() {
 
         @Override
-
         public void handleMessage(Message msg) {
-    		//Log.v(Constants.LOG_TAG,"handleMessage()->");
-    		updateView(mUpdateThread);
-    		//Log.v(Constants.LOG_TAG,"<-handleMessage()");
+    		updateView();
         }
 
     };
+    /**
+     * 
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
@@ -187,26 +223,60 @@ public class SiteUpdateDetails extends Activity {
     	}
     	return true;
     }
-	private Handler mHandler = new Handler() {
-	    public void handleMessage(Message msg) {
-	        switch (msg.what) {
-	            case 0:
-	            //answer(msg.obj);
-	            Log.d(Constants.LOG_TAG, "retry update for "+mUpdate.getName());
-	            break;
-	    
-	            case 1:
-	            // voicemail(msg.obj);
-	            Log.d(Constants.LOG_TAG, "cancel update for "+mUpdate.getName());
-	            break;
-	    
-	        }
-	    }
-	};
 	@Override
 	protected void onPause() {
 		// TODO Auto-generated method stub
 		super.onPause();
-		vt.stop();
 	}
+	@Override
+	protected void onRestart() {
+		// TODO Auto-generated method stub
+		super.onRestart();
+		Log.d(Constants.LOG_TAG, "SiteUpdateDetails onRestart()");
+	}
+	@Override
+	protected void onResume() {
+		Log.d(Constants.LOG_TAG, "SiteUpdateDetails onResume()");
+		// TODO Auto-generated method stub
+		super.onResume();
+        SiteData selectedSite = null;
+        Intent i = getIntent();
+        Bundle extras = i.getExtras();
+        if (extras.get(Constants.INTENT_EXTRA_SITE_UPDATE) != null) {
+        	Log.v(Constants.LOG_TAG, extras.get(Constants.INTENT_EXTRA_SITE_UPDATE).toString());
+        	//selectedSite = (SiteData) extras.get(Constants.INTENT_EXTRA_SITE_UPDATE);
+        	Integer selectedSiteIndex = (Integer) extras.get(Constants.INTENT_EXTRA_SITE_UPDATE);
+        	selectedSite = SiteList.mSiteList.get(selectedSiteIndex);
+            mUpdate = getSiteUpdateData(selectedSite);
+
+            if (mUpdate != null) {
+            	Log.v(Constants.LOG_TAG, mUpdate.toString());
+        		startViewUpdater();   	
+            	if (mUpdate.isUpdateInProgress()) {
+            		//setContentView(R.layout.site_update_in_progress_details);
+            		startViewUpdater();
+            	}
+            	else {
+            		updateView();
+            	}
+
+            }
+            else {    
+                AlertDialog.Builder diag =  new AlertDialog.Builder(this);
+            	diag.setMessage("Failed to get site data");
+            	diag.setPositiveButton("Try Again", null);
+            	diag.setNegativeButton("Cancel", null);
+            	diag.show();
+            }
+        }
+        else if (extras.get(Constants.INTENT_EXTRA_SITE_RUNNING_UPDATE) != null) {
+        	Log.v(Constants.LOG_TAG, mUpdate.toString());
+        }
+    }
+	@Override
+	protected void onStop() {
+		// TODO Auto-generated method stub
+		super.onStop();
+	}
+	
 }

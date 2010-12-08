@@ -14,8 +14,6 @@ import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.geoplicity.mobile.util.Property;
-
 import android.util.Log;
 
 public class SiteUpdateThread extends Thread {
@@ -25,31 +23,62 @@ public class SiteUpdateThread extends Thread {
 	public static final int MODE_UNPACK = 3;
 	public static final int MODE_CLEANUP = 4;
 	public static final int MODE_FINISH = 5;
+	/**
+	 * The mode of operation.  The modes represent each step of the update process.
+	 * By default the thread starts at 0, though you can specify which step of
+	 * the process in which the thread will start by setting the mode before
+	 * calling start() 
+	 */
 	int mode;
+	/**
+	 * Set false to 
+	 */
+	boolean destroy;
 	SiteUpdateData updateData; 
-
+	/**
+	 * 
+	 * @param update
+	 */
+	public SiteUpdateThread(SiteUpdateData update) {
+		updateData = update;
+		mode = updateData.getCurrentMode();
+	}
 	@Override
 	public void run() {
 		Log.v(Constants.LOG_TAG, "start run, mode="+mode);
-		switch (mode) {
-			case MODE_START:
-				downloadBlocks(Constants.SDCARD_ROOT+"/Geoplicity/"+Constants.UPDATE_TEMP_DIR);
-			case MODE_RESUME:
-				//TODO Implement 
-				Log.v("Current block",Integer.toString(updateData.getCurrentBlock()));
-			case MODE_REASSEMBLE:
-				reassemble(Constants.SDCARD_ROOT+"/Geoplicity/"+Constants.UPDATE_TEMP_DIR);
-			case MODE_UNPACK:
-				unpack(Constants.SDCARD_ROOT+"/Geoplicity/"+Constants.UPDATE_TEMP_DIR, updateData.getName());
-			case MODE_CLEANUP:
-				deleteTemp(Constants.SDCARD_ROOT+"/Geoplicity/"+Constants.UPDATE_TEMP_DIR);
-			case MODE_FINISH:
-				updateSiteProps();
-			default:
-			
+		updateData.setUpdateStarted(true);
+		updateData.setUpdateInProgress(true);
+		try {
+			switch (mode) {
+				case MODE_START:
+					updateData.setCurrentMode(MODE_START);
+					downloadBlocks(Constants.SDCARD_ROOT+"/Geoplicity/"+Constants.UPDATE_TEMP_DIR);
+				case MODE_RESUME:
+					//TODO Implement 
+					updateData.setCurrentMode(MODE_RESUME);
+					Log.v(Constants.LOG_TAG,"Current block:"+Integer.toString(updateData.getCurrentBlock()));
+				case MODE_REASSEMBLE:
+					updateData.setCurrentMode(MODE_REASSEMBLE);
+					reassemble(Constants.SDCARD_ROOT+"/Geoplicity/"+Constants.UPDATE_TEMP_DIR);
+				case MODE_UNPACK:
+					updateData.setCurrentMode(MODE_UNPACK);
+					unpack(Constants.SDCARD_ROOT+"/Geoplicity/"+Constants.UPDATE_TEMP_DIR, updateData.getName());
+				case MODE_CLEANUP:
+					updateData.setCurrentMode(MODE_CLEANUP);
+					deleteTemp(Constants.SDCARD_ROOT+"/Geoplicity/"+Constants.UPDATE_TEMP_DIR);
+				case MODE_FINISH:
+					updateData.setCurrentMode(MODE_FINISH);
+					updateSiteProps();
+				default:
+			}	
+			updateData.setUpdateComplete(true);
+		} catch (InterruptedException e) {
+			Log.v(Constants.LOG_TAG, e.getMessage());
 		}
+		updateData.setUpdateInProgress(false);
+
 	}
-	private void downloadBlocks(String tmpDir) {
+	private void downloadBlocks(String tmpDir) throws InterruptedException {
 		File dir = new File(tmpDir);
 		if (!dir.exists()) {
 			if (dir.mkdirs()) {
@@ -64,6 +93,9 @@ public class SiteUpdateThread extends Thread {
 			String blockName = updateData.getName()+i;
 			downloadBlock(Constants.UPDATE_SERVER+updateData.getName()+"/"+updateData.getVersion()+"/"+blockName, tmpDir+blockName);
 			Log.v(Constants.LOG_TAG,"Files done downloading");
+		    if (Thread.currentThread().isInterrupted()) {
+		        throw new InterruptedException("Thread Interrupted");
+		      }
 		}
 
 	}
@@ -192,9 +224,6 @@ public class SiteUpdateThread extends Thread {
 	}
 	public void setUpdateData(SiteUpdateData updateData) {
 		this.updateData = updateData;
-	}
-	public SiteUpdateThread(SiteUpdateData update) {
-		updateData = update;
 	}
 	/**
 	 * 

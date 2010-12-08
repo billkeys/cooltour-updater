@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+
 <RelativeLayout 
 	android:id="@+id/RelativeLayout01" 
 	android:layout_width="fill_parent" 
@@ -64,7 +64,7 @@
 		android:text="paused" 
 		android:id="@+id/site_update_status"
 		android:textSize="20sp"
-		android:visibility="gone"
+		android:visibility="visible"
 		android:layout_width="wrap_content" 
 		android:layout_height="wrap_content"
 		android:layout_below="@id/site_update_details_size">
@@ -73,7 +73,7 @@
 		android:text="53%" 
 		android:id="@+id/site_update_progress"
 		android:textSize="20sp"
-		android:visibility="gone"
+		android:visibility="visible"
 		android:layout_width="wrap_content" 
 		android:layout_height="wrap_content"
 		android:layout_below="@id/site_update_status">

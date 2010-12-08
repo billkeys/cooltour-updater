@@ -1,49 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TableLayout android:id="@+id/TableLayout01" 
+<RelativeLayout 
+	android:id="@+id/RelativeLayout01" 
 	android:layout_width="fill_parent" 
 	android:layout_height="fill_parent" 
 	xmlns:android="http://schemas.android.com/apk/res/android">
-<TableRow android:id="@+id/site_update_details_name_row" 
-	android:layout_width="wrap_content" 
-	android:layout_height="wrap_content">
 	<TextView
 		android:text="Name"  
 		android:id="@+id/site_update_details_name"
-		android:textSize="20sp" 
+		android:textSize="24sp" 
 		android:textColor="#FFFFFF"
 		android:textStyle="bold"
 		android:layout_width="wrap_content" 
 		android:layout_height="wrap_content">
 	</TextView>	
-</TableRow>
-<TableRow android:id="@+id/site_update_status_row" 
-	android:layout_width="wrap_content" 
-	android:layout_height="wrap_content">
 	<TextView
 		android:text="In Progress"  
+		android:textSize="20sp"
 		android:id="@+id/site_update_status"
-		android:textColor="#FFFFFF"
 		android:layout_width="wrap_content" 
-		android:layout_height="wrap_content">
+		android:layout_height="wrap_content"
+		android:layout_below="@id/site_update_details_name">
 	</TextView>	
-</TableRow>
-<TableRow android:id="@+id/site_update_in_progress_button_row" 
-	android:layout_width="wrap_content" 
-	android:layout_height="wrap_content">
+	<TextView
+		android:text="0"
+		android:textSize="20sp"
+		android:id="@+id/site_update_block_count"
+		android:layout_width="wrap_content" 
+		android:layout_height="wrap_content"
+		android:layout_below="@id/site_update_status">
+	</TextView>	
+	<TextView
+		android:text=" blocks downloaded"  
+		android:id="@+id/site_update_block_count_t"
+		android:textSize="20sp"
+		android:layout_width="wrap_content" 
+		android:layout_height="wrap_content"
+		android:layout_toRightOf="@id/site_update_block_count"
+		android:layout_alignTop="@id/site_update_block_count">
+	</TextView>	
 	<Button 
 	android:text="Pause" 
+	android:textSize="24sp"
 	android:id="@+id/site_update_pause_button" 
-	android:layout_width="wrap_content" 
+	android:layout_weight="50"
+	android:layout_width="150px" 
 	android:layout_height="wrap_content"
-	android:onClick="startUpdate" ></Button>
-		<Button 
+	android:onClick="pauseUpdate" 
+	android:layout_alignParentBottom="true">
+	</Button>
+	<Button 
 	android:text="Cancel" 
 	android:id="@+id/site_update_cancel_button" 
-	android:layout_width="wrap_content" 
+	android:textSize="24sp"
+	android:layout_weight="50" 
+	android:layout_width="150px"
 	android:layout_height="wrap_content"
-	android:onClick="startUpdate" ></Button>			
-</TableRow>
-
-
-
-</TableLayout>
+	android:onClick="cancelUpdate"
+	android:layout_alignParentRight="true"
+	android:layout_alignParentBottom="true"
+	>
+	</Button>	
+</RelativeLayout>		
