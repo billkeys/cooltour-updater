@@ -29,7 +29,7 @@
 	<string name="update_available">Update Available!</string>
 	<string name="update_started">Update Started</string>
 	<string name="new_site">New Site!</string>
-	<string name="up_to_date">Up To Date</string>
+	<string name="up_to_date">At latest version</string>
 	<string name="update_paused">Paused</string>
 	<string name="update_failed">Failed</string>
 </resources>

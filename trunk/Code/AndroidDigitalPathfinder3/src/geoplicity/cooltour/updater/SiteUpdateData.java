@@ -109,7 +109,6 @@ public class SiteUpdateData extends SiteData {
 		", currentBlock="+currentBlock+", " +
 		"currentMode="+currentMode+"," +
 		"updateInProgress="+updateInProgress+", " +
-		"updateComplete="+updateComplete+", " +
 		"hasError="+hasError+", " +
 		"statusMessage="+statusMessage+" ]";
 	}

@@ -14,6 +14,7 @@ import org.geoplicity.mobile.util.Property;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -109,6 +110,7 @@ public class SiteList extends ListActivity {
     	else {
     		for (int i = 0 ; i< mSiteList.size(); i++) {
     			if (SiteUpdateManager.getInstance().containsUpdate(mSiteList.get(i).getName())) {
+    				Log.d(Constants.LOG_TAG, "refreshing entry "+mSiteList.get(i).getName());
     				mSiteList.set(i, 
     						SiteUpdateManager.getInstance().getUpdateThread(
     								mSiteList.get(i).getName()).getUpdateData());
@@ -127,7 +129,6 @@ public class SiteList extends ListActivity {
 		SiteData s = mSiteList.get(position);
 		Log.v(Constants.LOG_TAG, "position "+position+" selected, "+s.toString());
 		Intent i = new Intent(Constants.INTENT_ACTION_LAUNCH_SITE_UPDATE);
-
 		i.putExtra(Constants.INTENT_EXTRA_SITE_UPDATE, position); // key/value pair, where key needs current package prefix.
 		startActivity(i); 
 	}
@@ -152,9 +153,19 @@ public class SiteList extends ListActivity {
       
       if (mSiteList == null || mSiteList.isEmpty()) {
           AlertDialog.Builder diag =  new AlertDialog.Builder(this);
-        	diag.setMessage("Cannot get site list from server!");
-        	diag.setPositiveButton("Try Again", null);
-        	diag.setNegativeButton("Cancel", null);
+        	diag.setMessage("Failed to connect to server!");
+        	diag.setPositiveButton(getString(R.string.retry_update), new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+            		Intent i = new Intent(Constants.INTENT_ACTION_LAUNCH_SITE_UPDATER);
+            		startActivity(i); 
+               }
+           });
+        	diag.setNegativeButton(getString(R.string.cancel_update),  new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+            		Intent i = new Intent(Constants.INTENT_ACTION_MAIN_UI);
+            		startActivity(i); 
+               }
+           });
         	diag.show();
       }
       else {

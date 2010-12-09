@@ -78,6 +78,7 @@ public class SiteData extends RemoteProperties{
 		return "[ SiteData :: "+super.toString() +
 		", updateAvailable="+updateAvailable+", " +
 		"newSite="+newSite+"," +
-		"updateStarted="+updateStarted+" ]";
+		"updateStarted="+updateStarted+"," +
+		"updateComplete="+updateComplete+" ]";
 	}
 }
