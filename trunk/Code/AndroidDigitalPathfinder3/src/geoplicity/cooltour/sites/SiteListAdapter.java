@@ -1,18 +1,14 @@
 package geoplicity.cooltour.sites;
 
-import geoplicity.cooltour.sites.SiteData;
 import geoplicity.cooltour.ui.R;
 
 import java.util.ArrayList;
-
-import org.geoplicity.mobile.util.Logger;
 
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 /**
  * List Adapter for SiteData objects
@@ -22,13 +18,13 @@ import android.widget.TextView;
  */
 public class SiteListAdapter<T> extends ArrayAdapter<SiteData> {
 
-        private ArrayList<SiteData> items;
-        private Context c;
+        private ArrayList<SiteData> mItems;
+        private Context mContext;
 
         public SiteListAdapter(Context context, int textViewResourceId, ArrayList<SiteData> items) {
                 super(context, textViewResourceId, items);
-                this.items = items;
-                this.c = context;
+                this.mItems = items;
+                this.mContext = context;
         }
 
         @Override
@@ -36,18 +32,30 @@ public class SiteListAdapter<T> extends ArrayAdapter<SiteData> {
         	//Logger.log(Logger.DEBUG, "SiteListAdapter getView()");
         	View v = convertView;
                 if (v == null) {
-                	LayoutInflater vi = (LayoutInflater)c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                	LayoutInflater vi = (LayoutInflater)mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                     v = vi.inflate(R.layout.site_list_row, null);
                 }
-                SiteData site = items.get(position);
+                SiteData site = mItems.get(position);
                 if (site != null) {
-                        TextView tt = (TextView) v.findViewById(R.id.site_name);
-                        TextView bt = (TextView) v.findViewById(R.id.site_status);
-                        if (tt != null) {
-                              tt.setText(site.getName());                            }
-                        if(bt != null){
-                              bt.setText("Version: "+ site.getVersion());
+                        TextView siteName = (TextView) v.findViewById(R.id.site_name);
+                        TextView status = (TextView) v.findViewById(R.id.site_status);
+                        siteName.setText(site.getName().replaceAll("_", " "));
+                        if (site.isUpdateComplete()) {
+                        	status.setText(R.string.up_to_date);
                         }
+                        if (site.hasUpdateStarted()) {
+                        	status.setText(R.string.update_started);
+                        }
+                        else if (site.isUpdateAvailable()) {
+                        	status.setText(R.string.update_available);	
+                        }
+                        else if (site.isNewSite()) {
+                        	status.setText(R.string.new_site);	
+                        }
+                        else {
+                        	status.setText(R.string.up_to_date);
+                        }
+                        
                 }
                 return v;
         }
