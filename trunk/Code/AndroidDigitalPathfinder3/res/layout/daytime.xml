@@ -3,16 +3,16 @@
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="@color/pink"
-    >
+    android:background="@color/daytime2" >
 	<TextView  
     android:layout_width="fill_parent" 
     android:layout_height="wrap_content" 
     android:text="@string/app_title"
     android:textSize="35px"
     android:textStyle="bold"
-    android:textColor="@color/black"
-    android:layout_marginBottom="30px" />
+    android:layout_marginBottom="30px"
+    android:layout_marginLeft="5px"
+    android:textColor="@color/offblue" />
     <TextView  
     android:layout_width="fill_parent" 
     android:layout_height="wrap_content"
@@ -20,7 +20,7 @@
     android:layout_marginLeft="10px"
     android:layout_marginBottom="15px"
     android:text="@string/site_prompt"
-    android:textColor="@color/black" />
+    android:textColor="@color/darkgrey" />
     <Spinner 
     android:id="@+id/SiteSelect" 
     android:layout_width="fill_parent"
@@ -35,9 +35,9 @@
     android:layout_width="wrap_content" 
     android:layout_height="wrap_content"
     android:textSize="20px"
-    android:textColor="@color/black"
     android:layout_marginLeft="10px"
-    android:layout_marginBottom="15px">
+    android:layout_marginBottom="15px"
+    android:textColor="@color/darkgrey">
     </TextView>
     <Spinner 
     android:id="@+id/TourSelect" 
@@ -48,12 +48,12 @@
     android:layout_marginRight="10px"
     android:layout_marginBottom="20px">
     </Spinner>
-    <CheckBox android:text="@string/tour_begin"
-    android:textColor="@color/black" 
+    <CheckBox android:text="@string/tour_begin" 
     android:id="@+id/StartTourBegin" 
     android:layout_marginLeft="10px"
     android:layout_marginRight="13px"
     android:layout_marginBottom="15px"
+    android:textColor="@color/darkgrey"
     android:layout_width="wrap_content" 
     android:layout_height="wrap_content">
     </CheckBox>
@@ -82,4 +82,19 @@
 		android:text="@string/quit_app"
 		/>
 	</LinearLayout>
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </LinearLayout>

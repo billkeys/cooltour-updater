@@ -49,7 +49,7 @@ public class SiteUpdateDetails extends Activity {
 	private static final int ABOUT_ID = Menu.FIRST + 1;     
 	static SiteUpdateData sUpdate;
 	static SiteUpdateThread sUpdateThread;
-	private SiteUpdaterService mUpdaterService;
+	//private SiteUpdaterService mUpdaterService;
 	private ViewThread mViewThread;
 	/**
 	 * 
@@ -96,13 +96,13 @@ public class SiteUpdateDetails extends Activity {
 	public void toggleRun(View v) {
 		SiteUpdateManager mgr = SiteUpdateManager.getInstance();
 		SiteUpdateThread uThread = mgr.getUpdateThread(sUpdate, this);
-
+		/*
 		if (mUpdaterService != null) {
 			Log.d(Constants.LOG_TAG, "we have the service!");
 		}
 		else 
 			Log.d(Constants.LOG_TAG, "no service!");
-		
+		*/
 		if (!uThread.isAlive()) {
 			Log.v(Constants.LOG_TAG," starting update "+sUpdate.getName()+"");
 			mgr.startUpdate(sUpdate, this);
