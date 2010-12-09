@@ -80,7 +80,7 @@ public class SiteUpdateDetails extends Activity {
 		}
 		else {
 			String siteUpdateProperties = Constants.UPDATE_SERVER+
-			site.getName()+"/"+site.getVersion()+"/"+site.getName()+Constants.UPDATE_FILE_EXT; 
+			site.getName()+"/"+site.getNewVersion()+"/"+site.getName()+Constants.UPDATE_FILE_EXT; 
 
 			try {
 				su = new SiteUpdateData(siteUpdateProperties, site);
@@ -162,6 +162,12 @@ public class SiteUpdateDetails extends Activity {
         statusText.setText(sUpdate.getStatusMessage());
         //progress.setText(Integer.toString(sUpdate.getCurrentBlock())+" of "+sUpdate.getBlockCount());
         progress.setVisibility(View.INVISIBLE);
+    	int level = 0;
+    	if (sUpdate.getCurrentBlock() > 1) {
+    		double p =(( (double) sUpdate.getCurrentBlock()-1.0)/ (double) sUpdate.getBlockCount())*100.0;
+    		level = (int)p;
+    	}
+
         
 		if (sUpdate.isUpdateComplete()) {
         	toggleRunButton.setVisibility(View.GONE);
@@ -176,11 +182,6 @@ public class SiteUpdateDetails extends Activity {
         		progressBar.setVisibility(View.GONE);
         	}
         	else {
-            	int level = 0;
-            	if (sUpdate.getCurrentBlock() > 1) {
-            		double p =(( (double) sUpdate.getCurrentBlock()-1.0)/ (double) sUpdate.getBlockCount())*100.0;
-            		level = (int)p;
-            	}
                 progressBar.setProgress(level);
                 progressBar.setVisibility(View.VISIBLE);
         	}
@@ -193,6 +194,7 @@ public class SiteUpdateDetails extends Activity {
             else if (sUpdate.hasUpdateStarted()) {
             	toggleRunButton.setText(R.string.resume_update);
             	progressBar.setVisibility(View.VISIBLE);
+            	progressBar.setProgress(level);
             }
             else if (sUpdate.hasError()) {
             	toggleRunButton.setText(R.string.retry_update);
