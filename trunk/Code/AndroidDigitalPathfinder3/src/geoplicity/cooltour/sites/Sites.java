@@ -83,6 +83,7 @@ public class Sites extends RemoteProperties{
 				Log.d(Constants.LOG_TAG,"new site:"+thatSite.getName());
 				//new site
 				thatSite.setNewSite(true);
+				thatSite.setNewVersion(thatSite.getVersion());
 				sites.add(thatSite);
 			}
 		}
