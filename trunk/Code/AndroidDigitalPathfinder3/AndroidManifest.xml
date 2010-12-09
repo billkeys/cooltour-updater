@@ -45,8 +45,6 @@
 				<category android:name="android.intent.category.DEFAULT"></category>
 			</intent-filter>
 		</activity>
-
-<service android:name="geoplicity.cooltour.updater.SiteUpdaterService"></service>
 </application>
 <uses-sdk android:minSdkVersion="5" />
 
