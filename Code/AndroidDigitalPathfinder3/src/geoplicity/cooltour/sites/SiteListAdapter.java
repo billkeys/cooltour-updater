@@ -1,10 +1,13 @@
 package geoplicity.cooltour.sites;
 
 import geoplicity.cooltour.ui.R;
+import geoplicity.cooltour.updater.SiteUpdateData;
+import geoplicity.cooltour.util.Constants;
 
 import java.util.ArrayList;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,16 +39,22 @@ public class SiteListAdapter<T> extends ArrayAdapter<SiteData> {
                     v = vi.inflate(R.layout.site_list_row, null);
                 }
                 SiteData site = mItems.get(position);
+                Log.d(Constants.LOG_TAG, "SiteListAdapter.getView():"+site.toString());
                 if (site != null) {
+                	
                         TextView siteName = (TextView) v.findViewById(R.id.site_name);
                         TextView status = (TextView) v.findViewById(R.id.site_status);
                         siteName.setText(site.getName().replaceAll("_", " "));
-                        if (site.isUpdateComplete()) {
-                        	status.setText(R.string.up_to_date);
+                        if (site instanceof SiteUpdateData) {
+                        	SiteUpdateData uSite = (SiteUpdateData) site;
+                        	status.setText(uSite.getStatusMessage());
                         }
-                        if (site.hasUpdateStarted()) {
-                        	status.setText(R.string.update_started);
-                        }
+//                        if (site.isUpdateComplete()) {
+//                        	status.setText(R.string.up_to_date);
+//                        }
+//                        if (site.hasUpdateStarted()) {
+//                        	status.setText(R.string.update_started);
+//                        }
                         else if (site.isUpdateAvailable()) {
                         	status.setText(R.string.update_available);	
                         }

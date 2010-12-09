@@ -9,6 +9,7 @@ import java.io.IOException;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -48,6 +49,7 @@ public class SiteUpdateDetails extends Activity {
 	 */
 	private static final int ABOUT_ID = Menu.FIRST + 1;     
 	static SiteUpdateData sUpdate;
+	static int selectedSiteIndex;
 	static SiteUpdateThread sUpdateThread;
 	//private SiteUpdaterService mUpdaterService;
 	private ViewThread mViewThread;
@@ -86,7 +88,6 @@ public class SiteUpdateDetails extends Activity {
 				Log.e(Constants.LOG_TAG, "Failed to get site update data", e);
 			}
 		}
-		Log.d(Constants.LOG_TAG, "SiteUpdateDetails getSiteUpdateData() returning:"+su.toString());
 		return su;
 	}
 	/**
@@ -147,6 +148,7 @@ public class SiteUpdateDetails extends Activity {
         TextView size = (TextView) findViewById(R.id.site_update_details_size);
         TextView statusText = (TextView) findViewById(R.id.site_update_status);
         ProgressBar progressBar = (ProgressBar) findViewById(R.id.update_progress_bar);
+        ProgressBar progressSpinner = (ProgressBar) findViewById(R.id.update_progress_spinner);
         Button toggleRunButton = (Button) findViewById(R.id.site_update_toggle_button);
         Button cancelButton = (Button) findViewById(R.id.site_update_cancel_button);
 
@@ -154,11 +156,12 @@ public class SiteUpdateDetails extends Activity {
         version.setText(sUpdate.getVersion());
         blocks.setText(sUpdate.getBlockCount()+"");
         progressBar.setVisibility(View.GONE);
+        progressSpinner.setVisibility(View.GONE);
         size.setText(Utilities.parseBytesToHumanString(sUpdate.getFileSize()));
         statusText.setVisibility(View.VISIBLE);
         statusText.setText(sUpdate.getStatusMessage());
-        progress.setText(Integer.toString(sUpdate.getCurrentBlock())+" of "+sUpdate.getBlockCount());
-        progress.setVisibility(View.VISIBLE);
+        //progress.setText(Integer.toString(sUpdate.getCurrentBlock())+" of "+sUpdate.getBlockCount());
+        progress.setVisibility(View.INVISIBLE);
         
 		if (sUpdate.isUpdateComplete()) {
         	toggleRunButton.setVisibility(View.GONE);
@@ -168,13 +171,19 @@ public class SiteUpdateDetails extends Activity {
 			toggleRunButton.setText(R.string.pause_update);
         	toggleRunButton.setVisibility(View.VISIBLE);
         	cancelButton.setVisibility(View.VISIBLE);
-        	int level = 0;
-        	if (sUpdate.getCurrentBlock() > 1) {
-        		double p =(( (double) sUpdate.getCurrentBlock()-1.0)/ (double) sUpdate.getBlockCount())*100.0;
-        		level = (int)p;
+        	if (sUpdate.getCurrentMode() > SiteUpdateThread.MODE_RESUME) {
+        		progressSpinner.setVisibility(View.VISIBLE);
+        		progressBar.setVisibility(View.GONE);
         	}
-            progressBar.setProgress(level);
-            progressBar.setVisibility(View.VISIBLE);
+        	else {
+            	int level = 0;
+            	if (sUpdate.getCurrentBlock() > 1) {
+            		double p =(( (double) sUpdate.getCurrentBlock()-1.0)/ (double) sUpdate.getBlockCount())*100.0;
+            		level = (int)p;
+            	}
+                progressBar.setProgress(level);
+                progressBar.setVisibility(View.VISIBLE);
+        	}
         }
         else {
             if (!sUpdate.isUpdateAvailable() && !sUpdate.isNewSite()) {
@@ -207,12 +216,19 @@ public class SiteUpdateDetails extends Activity {
 	 *
 	 */
 	protected class ViewThread extends Thread {
+		int sLastMode = 0;
 		@Override
 		public void run() {
 			try{ 
 				while (sUpdate.isUpdateInProgress()) {
+					//After the download finished, only update the view as we step through each mode
+					if (sUpdate.getCurrentMode() >= SiteUpdateThread.MODE_REASSEMBLE
+							&& sUpdate.getCurrentMode() == sLastMode) {
+						continue;
+					}
 					handler.sendEmptyMessage(0);
 					sleep(500);
+					sLastMode = sUpdate.getCurrentMode();
 				}
 				//Update once more after we exit the loop
 				handler.sendEmptyMessage(0);
@@ -276,10 +292,10 @@ public class SiteUpdateDetails extends Activity {
         SiteData selectedSite = null;
         Intent i = getIntent();
         Bundle extras = i.getExtras();
-    	
+        //Integer selectedSiteIndex;
     	if (extras != null && extras.get(Constants.INTENT_EXTRA_SITE_UPDATE) != null) {
     		Log.v(Constants.LOG_TAG, "extra="+Constants.INTENT_EXTRA_SITE_UPDATE);
-    		Integer selectedSiteIndex = (Integer) extras.get(Constants.INTENT_EXTRA_SITE_UPDATE);
+    		selectedSiteIndex = (Integer) extras.get(Constants.INTENT_EXTRA_SITE_UPDATE);
         	selectedSite = SiteList.mSiteList.get(selectedSiteIndex);
             sUpdate = getSiteUpdateData(selectedSite);
     	}
@@ -293,7 +309,7 @@ public class SiteUpdateDetails extends Activity {
     	}
 
         if (sUpdate != null) {
-            //Log.d(Constants.LOG_TAG, "details for site:"+mUpdate.toString());
+    		Log.d(Constants.LOG_TAG, "SiteUpdateDetails displaying:"+sUpdate.toString());
     		startViewUpdater();   	
         	if (sUpdate.isUpdateInProgress()) {
         		//setContentView(R.layout.site_update_in_progress_details);
@@ -307,8 +323,19 @@ public class SiteUpdateDetails extends Activity {
         else {    
             AlertDialog.Builder diag =  new AlertDialog.Builder(this);
         	diag.setMessage("Failed to get site data!");
-        	diag.setPositiveButton("Try Again", null);
-        	diag.setNegativeButton("Cancel", null);
+        	diag.setPositiveButton(getString(R.string.retry_update), new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+            		Intent i = new Intent(Constants.INTENT_ACTION_LAUNCH_SITE_UPDATE);
+            		i.putExtra(Constants.INTENT_EXTRA_SITE_UPDATE, selectedSiteIndex);
+            		startActivity(i); 
+               }
+           });
+        	diag.setNegativeButton(getString(R.string.cancel_update),  new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+            		Intent i = new Intent(Constants.INTENT_ACTION_LAUNCH_SITE_UPDATER);
+            		startActivity(i); 
+               }
+           });
         	diag.show();
         }
     }

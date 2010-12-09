@@ -74,7 +74,7 @@ public class SiteUpdateThread extends Thread {
 	public void run() {
 		Log.v(Constants.LOG_TAG, "start run, mode="+mMode);
 		//Log.d(Constants.LOG_TAG,Property.dump());
-		mUpdateData.setStatusMessage("Downloading");
+		mUpdateData.setStatusMessage("Update Started");
 		mUpdateData.setUpdateStarted(true);
 		mUpdateData.setUpdateInProgress(true);
 		notifyUser();
@@ -89,14 +89,14 @@ public class SiteUpdateThread extends Thread {
 					Log.v(Constants.LOG_TAG,"Current block:"+Integer.toString(mUpdateData.getCurrentBlock()));
 				case MODE_REASSEMBLE:
 					mUpdateData.setCurrentMode(MODE_REASSEMBLE);
-					mUpdateData.setStatusMessage("Reassembling Archive");
+					mUpdateData.setStatusMessage("Reassembling Archive...");
 					reassemble(mTmpDir);
 				case MODE_UNPACK:
 					mUpdateData.setCurrentMode(MODE_UNPACK);
-					mUpdateData.setStatusMessage("Extracting Archive");
+					mUpdateData.setStatusMessage("Extracting Archive...");
 					unpack(mTmpDir, mUpdateData.getName());
 				case MODE_CLEANUP:
-					mUpdateData.setStatusMessage("Finishing Up");
+					mUpdateData.setStatusMessage("Finishing Up...");
 					mUpdateData.setCurrentMode(MODE_CLEANUP);
 					deleteTemp(mTmpDir);
 				case MODE_FINISH:
@@ -105,7 +105,7 @@ public class SiteUpdateThread extends Thread {
 				default:
 			}	
 			mUpdateData.setUpdateComplete(true);
-			mUpdateData.setStatusMessage("Complete!");
+			mUpdateData.setStatusMessage("Update Complete!");
 		} catch (InterruptedException e) {
 			if (mCancel) {
 				mUpdateData.setStatusMessage("Canceled");
@@ -139,11 +139,13 @@ public class SiteUpdateThread extends Thread {
 		}
 		for(int i=mUpdateData.getCurrentBlock();i<=mUpdateData.getBlockCount();i++){
 			String blockName = mUpdateData.getName()+i;
+			mUpdateData.setStatusMessage("Downloading file "+i+" of "+mUpdateData.getBlockCount());
 			downloadBlock(Constants.UPDATE_SERVER+mUpdateData.getName()+"/"+mUpdateData.getVersion()+"/"+blockName, tmpDir+blockName);
 			Log.v(Constants.LOG_TAG,"Files done downloading");
 		    if (Thread.currentThread().isInterrupted()) {
 		        throw new InterruptedException("Thread Interrupted");
-		      }
+		    }
+			mUpdateData.incrementCurrentBlock();
 		}
 
 	}
@@ -171,7 +173,6 @@ public class SiteUpdateThread extends Thread {
 			}
 			bout.close();
 			in.close();
-			mUpdateData.incrementCurrentBlock();
 			//}
 //		} catch (Exception e) {
 //			e.printStackTrace();
