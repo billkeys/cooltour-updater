@@ -188,10 +188,14 @@ public class MainUI extends Activity {
     		  if (item.getTitle().equals("Change Screen Daytime")){		  
     			  setContentView(R.layout.daytime);
     		  	  item.setTitle("Restore Default");
+    		  	  bindToLayout();
+    		  	  loadApplicationProperties();
     		  }
     		  else {
     			  setContentView(R.layout.main);
     			  item.setTitle(R.string.menu_daytime);
+    			  bindToLayout();
+    			  loadApplicationProperties();
     		  }
     	}
 		return super.onOptionsItemSelected(item);
