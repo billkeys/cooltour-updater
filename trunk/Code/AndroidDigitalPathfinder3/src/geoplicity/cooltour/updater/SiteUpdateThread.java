@@ -86,15 +86,19 @@ public class SiteUpdateThread extends Thread {
 				case MODE_RESUME:
 					//TODO Implement 
 					mUpdateData.setCurrentMode(MODE_RESUME);
-					Log.v(Constants.LOG_TAG,"Current block:"+Integer.toString(mUpdateData.getCurrentBlock()));
+					//downloadBlocks(mTmpDir);
 				case MODE_REASSEMBLE:
 					mUpdateData.setCurrentMode(MODE_REASSEMBLE);
 					mUpdateData.setStatusMessage("Reassembling Archive...");
 					reassemble(mTmpDir);
+					//verify(mUpdateData.getName());
 				case MODE_UNPACK:
 					mUpdateData.setCurrentMode(MODE_UNPACK);
 					mUpdateData.setStatusMessage("Extracting Archive...");
 					unpack(mTmpDir, mUpdateData.getName());
+					deleteBlocks(mTmpDir);
+					copyDirectory(new File(mTmpDir+mUpdateData.getName()),new File(Constants.SDCARD_ROOT+Constants.DEFAULT_APP_ROOT_DIR+"/"+mUpdateData.getName()));
+					deleteTmpRemnants(mTmpDir,mUpdateData.getName());
 				case MODE_CLEANUP:
 					mUpdateData.setStatusMessage("Finishing Up...");
 					mUpdateData.setCurrentMode(MODE_CLEANUP);
@@ -124,6 +128,46 @@ public class SiteUpdateThread extends Thread {
 		mUpdateData.setUpdateInProgress(false);
 		notifyUser();
 
+	}
+	private void copyDirectory(File sourceLocation , File targetLocation)
+    throws IOException {
+        
+        if (sourceLocation.isDirectory()) {
+            if (!targetLocation.exists()) {
+                targetLocation.mkdir();
+            }
+            
+            String[] children = sourceLocation.list();
+            for (int i=0; i<children.length; i++) {
+                copyDirectory(new File(sourceLocation, children[i]),
+                        new File(targetLocation, children[i]));
+            }
+        } else {
+            
+            FileInputStream in = new FileInputStream(sourceLocation);
+            FileOutputStream out = new FileOutputStream(targetLocation);
+            
+            // Copy the bits from instream to outstream
+            byte[] buf = new byte[1024];
+            int len;
+            while ((len = in.read(buf)) > 0) {
+                out.write(buf, 0, len);
+            }
+            in.close();
+            out.close();
+        }
+    }
+	private void deleteTmpRemnants(String mTmpDir, String name) {
+		File toDelete = new File(Constants.SDCARD_ROOT+Constants.DEFAULT_APP_ROOT_DIR+"/"+name+"/"+name);
+		toDelete.delete();
+	}
+	private void deleteBlocks(String mTmpDir) {
+		for(int i=1;i<=mUpdateData.getBlockCount();i++){
+			File f = new File(mTmpDir+mUpdateData.getName()+i);
+			f.delete();
+			Log.v(Constants.LOG_TAG,"block "+i+" deleted");
+		}
+		Log.v(Constants.LOG_TAG, "blocks deleted from temp folder" );
 	}
 	private void downloadBlocks(String tmpDir) throws InterruptedException, IOException {
 		File dir = new File(tmpDir);
@@ -186,31 +230,33 @@ public class SiteUpdateThread extends Thread {
 	 * @param location
 	 * @param name
 	 */
-	private void unpack(String location, String name){
-		try {
+	private void unpack(String location, String name) throws IOException{
 			ZipInputStream zis = null;
 
-			FileInputStream fis = new FileInputStream(location+name+".zip");
+			FileInputStream fis = new FileInputStream(location+name+"."+mUpdateData.getFileFormat());
 			zis = new ZipInputStream(fis);
 
 			ZipEntry ze;
 			
-			File mainDir = new File(Constants.SDCARD_ROOT+
+			/*File mainDir = new File(Constants.SDCARD_ROOT+
 					Property.getProperty(Constants.PROPERTY_APP_ROOT_DIR)+
-					"/"+name+"/");
+					"/"+Constants.UPDATE_TEMP_DIR+name+"/");*/
+			File mainDir = new File(location+name+"/"+name+"/");
 			mainDir.mkdirs();
 
 			while ((ze = zis.getNextEntry()) != null) {
 				if (ze.isDirectory()) {
-					File dir = new File(Constants.SDCARD_ROOT + 
+					/*File dir = new File(Constants.SDCARD_ROOT + 
 							Property.getProperty(Constants.PROPERTY_APP_ROOT_DIR) + 
-							"/" + ze.getName());
+							"/" +Constants.UPDATE_TEMP_DIR + ze.getName());*/
+					File dir = new File(location+ze.getName());
 					dir.mkdirs();
 					Log.v(Constants.LOG_TAG,dir.toString()+" created");
 				} else {
-					File f = new File(Constants.SDCARD_ROOT + 
+					/*File f = new File(Constants.SDCARD_ROOT + 
 							Property.getProperty(Constants.PROPERTY_APP_ROOT_DIR)+"/"+ 
-							ze.getName());
+							Constants.UPDATE_TEMP_DIR+ze.getName());*/
+					File f = new File(location+ze.getName());
 					f.createNewFile();
 					Log.v(Constants.LOG_TAG,f.toString()+" created");
 					OutputStream out = new FileOutputStream(f);
@@ -224,9 +270,6 @@ public class SiteUpdateThread extends Thread {
 				}
 				Log.v(Constants.LOG_TAG,"Done unpacking");
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 	/**
 	 * args[0] is the location on device (eg. C:\Test\sdcard\geoplicity)
