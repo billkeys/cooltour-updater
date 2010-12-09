@@ -115,7 +115,6 @@ public class SiteUpdateThread extends Thread {
 			else{
 				mUpdateData.setStatusMessage("Paused");
 			}
-			
 			Log.v(Constants.LOG_TAG, e.getMessage());
 		} catch (IOException e) {
 			mUpdateData.setStatusMessage("Failed");
