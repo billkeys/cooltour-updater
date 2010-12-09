@@ -9,7 +9,10 @@
 	<string name="tour_prompt">Please select a tour</string>
 	<string name="tour_begin">Start at the beginning</string>
 	<string name="menu_updater">Launch Updater</string>
+	<string name="menu_daytime">Change Screen Daytime</string>
 	<color name="green">#008000</color>
+	<color name="pink">#FF00FF</color>
+	<color name="black">#000000</color>
 	<color name="red">#ff0000</color>
 	<string name="menu_about">About Digital PathFinder</string>
 	<string name="menu_home">Home</string>
