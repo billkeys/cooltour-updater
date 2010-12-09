@@ -22,7 +22,7 @@ public class UpdaterTester {
 	}
 	public static void testThread() {
 		SiteUpdateData update = new SiteUpdateData();
-		SiteUpdateThread updateThread = new SiteUpdateThread(update);
+		//SiteUpdateThread updateThread = new SiteUpdateThread(update);
 	}
 
 }

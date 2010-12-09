@@ -22,15 +22,18 @@ public class SiteUpdateData extends SiteData {
 	public static final String KEY_FILE_SIZE = "file_size";
 	int currentBlock = 1;
 	int currentMode = 0;
-	boolean updateStarted;
 	boolean updateInProgress;
-	boolean updateComplete;
-	String resultMessage;
+
+	boolean hasError;
+	String statusMessage;
 	public SiteUpdateData() {
 		super();
 	}
-	public SiteUpdateData(String urlString) throws IOException {
+	public SiteUpdateData(String urlString, SiteData site) throws IOException {
 		super(urlString);
+		this.updateAvailable = site.isUpdateAvailable();
+		this.updateStarted = site.hasUpdateStarted();
+		this.newSite = site.isNewSite();
 	}
 	public SiteUpdateData(SiteData site) {
 		super();
@@ -76,23 +79,11 @@ public class SiteUpdateData extends SiteData {
 	public void incrementCurrentBlock() {
 		this.currentBlock++;
 	}
-	public boolean isUpdateComplete() {
-		return updateComplete;
+	public String getStatusMessage() {
+		return statusMessage;
 	}
-	public void setUpdateComplete(boolean updateComplete) {
-		this.updateComplete = updateComplete;
-	}
-	public String getResultMessage() {
-		return resultMessage;
-	}
-	public void setResultMessage(String resultMessage) {
-		this.resultMessage = resultMessage;
-	}
-	public boolean hasUpdateStarted() {
-		return updateStarted;
-	}
-	public void setUpdateStarted(boolean updateStarted) {
-		this.updateStarted = updateStarted;
+	public void setStatusMessage(String resultMessage) {
+		this.statusMessage = resultMessage;
 	}
 	public int getCurrentMode() {
 		return currentMode;
@@ -100,5 +91,26 @@ public class SiteUpdateData extends SiteData {
 	public void setCurrentMode(int currentMode) {
 		this.currentMode = currentMode;
 	}
-
+	public boolean hasError() {
+		return hasError;
+	}
+	public void setHasError(boolean hasError) {
+		this.hasError = hasError;
+	}
+	public void reset() {
+		currentBlock = 1;
+		currentMode = 0;
+		updateInProgress = false;
+		updateStarted = false;
+		
+	}
+	public String toString() {
+		return "[ SiteUpdateData :: "+super.toString() +
+		", currentBlock="+currentBlock+", " +
+		"currentMode="+currentMode+"," +
+		"updateInProgress="+updateInProgress+", " +
+		"updateComplete="+updateComplete+", " +
+		"hasError="+hasError+", " +
+		"statusMessage="+statusMessage+" ]";
+	}
 }

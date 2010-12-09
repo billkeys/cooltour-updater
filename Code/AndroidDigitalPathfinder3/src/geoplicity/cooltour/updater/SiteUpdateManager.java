@@ -6,6 +6,7 @@ import geoplicity.cooltour.util.Constants;
 import java.util.HashMap;
 import java.util.Map;
 
+import android.content.Context;
 import android.util.Log;
 /**
  * Singleton class to track threads
@@ -13,9 +14,10 @@ import android.util.Log;
  *
  */
 public class SiteUpdateManager {
-	static SiteUpdateManager ref;
-	Map<String,SiteData> sites;
-	Map<String,SiteUpdateThread> updates;
+	static SiteUpdateManager sRef;
+	Context mContext;
+	Map<String,SiteData> mSites;
+	Map<String,SiteUpdateThread> mUpdates;
 	/**
 	 * @param args
 	 */
@@ -26,38 +28,52 @@ public class SiteUpdateManager {
 	/**
 	 * Private Constructor
 	 */
-	private SiteUpdateManager() {
-		updates = new HashMap<String,SiteUpdateThread>();
-		sites = new  HashMap<String,SiteData>();
+	private SiteUpdateManager(Context c) {
+		mUpdates = new HashMap<String,SiteUpdateThread>();
+		mSites = new  HashMap<String,SiteData>();
+	}
+	public static SiteUpdateManager getInstance() {
+		return getInstance(null);
 	}
 	/**
 	 * Returns the one instance of this class.
 	 * @return
 	 */
-	public static SiteUpdateManager getInstance() {
-		if (ref == null) {
-			Log.d(Constants.LOG_TAG, "new SiteUpdateManager instance");
-			ref = new SiteUpdateManager();
+	public static SiteUpdateManager getInstance(Context c) {
+		if (sRef == null) {
+			Log.d(Constants.LOG_TAG, "new SiteUpdateManager instance, context:"+c);
+			sRef = new SiteUpdateManager(c);
 		}
-		return ref;
+		if (c != null) {
+			Log.d(Constants.LOG_TAG, "setting new context:"+c);
+			sRef.mContext =c;
+		}
+		return sRef;
 	}
 	/**
 	 * Get the thread
 	 * @param upd
 	 * @return
 	 */
-	public SiteUpdateThread getUpdateThread(SiteUpdateData upd) {
-		if (updates.containsKey(upd.getName())) {
-			return updates.get(upd.getName());
+	public SiteUpdateThread getUpdateThread(SiteUpdateData upd, Context ctx) {
+		if (mUpdates.containsKey(upd.getName()) && 
+				mUpdates.get(upd.getName()).isAlive()) {
+				return mUpdates.get(upd.getName());
 		}
 		else {
-			SiteUpdateThread uThread = new SiteUpdateThread(upd);
+			Log.v(Constants.LOG_TAG, "creating new thread for "+upd.getName());
+			SiteUpdateThread uThread = new SiteUpdateThread(upd, ctx);
 			return uThread;
 		}
 	}
+	/**
+	 * 
+	 * @param siteName
+	 * @return
+	 */
 	public SiteUpdateThread getUpdateThread(String siteName) {
-		if (updates.containsKey(siteName)) {
-			return updates.get(siteName);
+		if (mUpdates.containsKey(siteName)) {
+			return mUpdates.get(siteName);
 		}
 		else {
 			return null;
@@ -67,19 +83,12 @@ public class SiteUpdateManager {
 	 * Start or 
 	 * @param upd
 	 */
-	public void startUpdate(SiteUpdateData upd) {
-		SiteUpdateThread uThread = new SiteUpdateThread(upd);
-		updates.put(upd.getName(), uThread);
+	public void startUpdate(SiteUpdateData upd, Context ctx) {
+		SiteUpdateThread uThread = getUpdateThread(upd,ctx);
+		mUpdates.put(upd.getName(), uThread);
 		uThread.start();
 		Log.v(Constants.LOG_TAG, "started update for "+upd.getName());
-		Log.d(Constants.LOG_TAG, "updates: "+updates.size());
-	}
-	public void pauseUpdate(SiteUpdateData upd) {
-		SiteUpdateThread uThread = getUpdateThread(upd);
-		uThread.suspend();
-//		updates.put(upd.getName(), uThread);
-//		uThread.start();
-		Log.v(Constants.LOG_TAG, "paused update for "+upd.getName());
+		Log.d(Constants.LOG_TAG, "updates: "+mUpdates.size());
 	}
 	/**
 	 * Check
@@ -87,9 +96,9 @@ public class SiteUpdateManager {
 	 * @return
 	 */
 	public boolean containsUpdate(String siteName) {
-		Log.d(Constants.LOG_TAG, "updates: "+updates.size());
+		Log.d(Constants.LOG_TAG, "updates: "+mUpdates.size());
 		boolean exists = false;
-		if (updates.containsKey(siteName))
+		if (mUpdates.containsKey(siteName))
 			exists = true;
 		Log.d(Constants.LOG_TAG, "Update "+siteName+" exists in SiteUpdateManager:"+exists);
 		return exists;

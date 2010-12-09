@@ -1,5 +1,6 @@
 package geoplicity.cooltour.updater;
 
+import geoplicity.cooltour.ui.R;
 import geoplicity.cooltour.util.Constants;
 
 import java.io.BufferedInputStream;
@@ -14,8 +15,19 @@ import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import android.util.Log;
+import org.geoplicity.mobile.util.Property;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
+/**
+ * 
+ * @author Brendon Drew (bjdrew@gmail.com)
+ *
+ */
 public class SiteUpdateThread extends Thread {
 	public static final int MODE_START = 0; 
 	public static final int MODE_RESUME = 1;
@@ -29,56 +41,92 @@ public class SiteUpdateThread extends Thread {
 	 * the process in which the thread will start by setting the mode before
 	 * calling start() 
 	 */
-	int mode;
+	int mMode;
 	/**
 	 * Set false to 
 	 */
-	boolean destroy;
-	SiteUpdateData updateData; 
+	boolean mCancel;
+	/**
+	 * The context within which this thread runs
+	 */
+	Context mContext;
+	/**
+	 * Update status
+	 */
+	SiteUpdateData mUpdateData;
+	/**
+	 * Temp directory.
+	 */
+	private String mTmpDir;
 	/**
 	 * 
 	 * @param update
 	 */
-	public SiteUpdateThread(SiteUpdateData update) {
-		updateData = update;
-		mode = updateData.getCurrentMode();
+	public SiteUpdateThread(SiteUpdateData update, Context c) {
+		mUpdateData = update;
+		mContext = c;
+		mMode = mUpdateData.getCurrentMode();
+		mTmpDir = Constants.SDCARD_ROOT+
+		Property.getProperty(Constants.PROPERTY_APP_ROOT_DIR)+"/"+
+		Constants.UPDATE_TEMP_DIR+"/"+mUpdateData.getName()+"/";
 	}
 	@Override
 	public void run() {
-		Log.v(Constants.LOG_TAG, "start run, mode="+mode);
-		updateData.setUpdateStarted(true);
-		updateData.setUpdateInProgress(true);
+		Log.v(Constants.LOG_TAG, "start run, mode="+mMode);
+		Log.d(Constants.LOG_TAG,Property.dump());
+		mUpdateData.setStatusMessage("Downloading");
+		mUpdateData.setUpdateStarted(true);
+		mUpdateData.setUpdateInProgress(true);
+		notifyUser();
 		try {
-			switch (mode) {
+			switch (mMode) {
 				case MODE_START:
-					updateData.setCurrentMode(MODE_START);
-					downloadBlocks(Constants.SDCARD_ROOT+"/Geoplicity/"+Constants.UPDATE_TEMP_DIR);
+					mUpdateData.setCurrentMode(MODE_START);
+					downloadBlocks(mTmpDir);
 				case MODE_RESUME:
 					//TODO Implement 
-					updateData.setCurrentMode(MODE_RESUME);
-					Log.v(Constants.LOG_TAG,"Current block:"+Integer.toString(updateData.getCurrentBlock()));
+					mUpdateData.setCurrentMode(MODE_RESUME);
+					Log.v(Constants.LOG_TAG,"Current block:"+Integer.toString(mUpdateData.getCurrentBlock()));
 				case MODE_REASSEMBLE:
-					updateData.setCurrentMode(MODE_REASSEMBLE);
-					reassemble(Constants.SDCARD_ROOT+"/Geoplicity/"+Constants.UPDATE_TEMP_DIR);
+					mUpdateData.setCurrentMode(MODE_REASSEMBLE);
+					mUpdateData.setStatusMessage("Reassembling Archive");
+					reassemble(mTmpDir);
 				case MODE_UNPACK:
-					updateData.setCurrentMode(MODE_UNPACK);
-					unpack(Constants.SDCARD_ROOT+"/Geoplicity/"+Constants.UPDATE_TEMP_DIR, updateData.getName());
+					mUpdateData.setCurrentMode(MODE_UNPACK);
+					mUpdateData.setStatusMessage("Extracting Archive");
+					unpack(mTmpDir, mUpdateData.getName());
 				case MODE_CLEANUP:
-					updateData.setCurrentMode(MODE_CLEANUP);
-					deleteTemp(Constants.SDCARD_ROOT+"/Geoplicity/"+Constants.UPDATE_TEMP_DIR);
+					mUpdateData.setStatusMessage("Finishing Up");
+					mUpdateData.setCurrentMode(MODE_CLEANUP);
+					deleteTemp(mTmpDir);
 				case MODE_FINISH:
-					updateData.setCurrentMode(MODE_FINISH);
+					mUpdateData.setCurrentMode(MODE_FINISH);
 					updateSiteProps();
 				default:
 			}	
-			updateData.setUpdateComplete(true);
+			mUpdateData.setUpdateComplete(true);
+			mUpdateData.setStatusMessage("Complete!");
 		} catch (InterruptedException e) {
+			if (mCancel) {
+				mUpdateData.setStatusMessage("Canceled");
+				mUpdateData.reset();
+				deleteTemp(mTmpDir);
+			}
+			else{
+				mUpdateData.setStatusMessage("Paused");
+			}
+			
+			Log.v(Constants.LOG_TAG, e.getMessage());
+		} catch (IOException e) {
+			mUpdateData.setStatusMessage("Failed");
+			mUpdateData.setHasError(true);
 			Log.v(Constants.LOG_TAG, e.getMessage());
 		}
-		updateData.setUpdateInProgress(false);
+		mUpdateData.setUpdateInProgress(false);
+		notifyUser();
 
 	}
-	private void downloadBlocks(String tmpDir) throws InterruptedException {
+	private void downloadBlocks(String tmpDir) throws InterruptedException, IOException {
 		File dir = new File(tmpDir);
 		if (!dir.exists()) {
 			if (dir.mkdirs()) {
@@ -86,12 +134,12 @@ public class SiteUpdateThread extends Thread {
 			}
 			else {
 				Log.e(Constants.LOG_TAG, "Failed to create "+dir);
-				return;
+				throw new IOException("Failed to create");
 			}
 		}
-		for(int i=updateData.getCurrentBlock();i<=updateData.getBlockCount();i++){
-			String blockName = updateData.getName()+i;
-			downloadBlock(Constants.UPDATE_SERVER+updateData.getName()+"/"+updateData.getVersion()+"/"+blockName, tmpDir+blockName);
+		for(int i=mUpdateData.getCurrentBlock();i<=mUpdateData.getBlockCount();i++){
+			String blockName = mUpdateData.getName()+i;
+			downloadBlock(Constants.UPDATE_SERVER+mUpdateData.getName()+"/"+mUpdateData.getVersion()+"/"+blockName, tmpDir+blockName);
 			Log.v(Constants.LOG_TAG,"Files done downloading");
 		    if (Thread.currentThread().isInterrupted()) {
 		        throw new InterruptedException("Thread Interrupted");
@@ -99,14 +147,13 @@ public class SiteUpdateThread extends Thread {
 		}
 
 	}
-	private void downloadBlock(String urlString, String saveTo){
-		try {
+	private void downloadBlock(String urlString, String saveTo) throws IOException, InterruptedException{
+//		try {
 			//for(int i=1;i<=Integer.parseInt(amount);i++){
 			Log.v(Constants.LOG_TAG, "fetching "+urlString);
 			//sleep(3000);
 			URL url = new URL(urlString);
 			BufferedInputStream in = new BufferedInputStream(url.openStream());
-			
 			
 			FileOutputStream fos = new FileOutputStream(saveTo);
 			BufferedOutputStream bout = new BufferedOutputStream(fos, 1024);
@@ -114,18 +161,25 @@ public class SiteUpdateThread extends Thread {
 			int x = 0;
 			while ((x=in.read(data,0,1024))>=0){
 				bout.write(data,0,x);
+				//Check for an interrupt
+			    if (Thread.currentThread().isInterrupted()) {
+					bout.close();
+					in.close();
+			        throw new InterruptedException("Thread Interrupted");
+			      }
+
 			}
 			bout.close();
 			in.close();
-			updateData.incrementCurrentBlock();
+			mUpdateData.incrementCurrentBlock();
 			//}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
 	}
 	private void reassemble(String tmpDir) {
 		//Blocker b = new Blocker();
-		Blocker.unblock(tmpDir+updateData.getName(), updateData.getBlockCount(), tmpDir+updateData.getName()+".zip");
+		Blocker.unblock(tmpDir+mUpdateData.getName(), mUpdateData.getBlockCount(), tmpDir+mUpdateData.getName()+".zip");
 	}
 	/**
 	 * 
@@ -141,16 +195,22 @@ public class SiteUpdateThread extends Thread {
 
 			ZipEntry ze;
 			
-			File mainDir = new File(Constants.SDCARD_ROOT+"/Geoplicity/"+name+"/");
+			File mainDir = new File(Constants.SDCARD_ROOT+
+					Property.getProperty(Constants.PROPERTY_APP_ROOT_DIR)+
+					"/"+name+"/");
 			mainDir.mkdirs();
 
 			while ((ze = zis.getNextEntry()) != null) {
 				if (ze.isDirectory()) {
-					File dir = new File(Constants.SDCARD_ROOT + "/Geoplicity/" + name + "/" + ze.getName());
+					File dir = new File(Constants.SDCARD_ROOT + 
+							Property.getProperty(Constants.PROPERTY_APP_ROOT_DIR) + 
+							"/" + ze.getName());
 					dir.mkdirs();
 					Log.v(Constants.LOG_TAG,dir.toString()+" created");
 				} else {
-					File f = new File(Constants.SDCARD_ROOT + "/Geoplicity/" + name + "/" + ze.getName());
+					File f = new File(Constants.SDCARD_ROOT + 
+							Property.getProperty(Constants.PROPERTY_APP_ROOT_DIR)+"/"+ 
+							ze.getName());
 					f.createNewFile();
 					Log.v(Constants.LOG_TAG,f.toString()+" created");
 					OutputStream out = new FileOutputStream(f);
@@ -189,6 +249,10 @@ public class SiteUpdateThread extends Thread {
 		Log.v(Constants.LOG_TAG,"Deleting "+path.toString());
 		return (path.delete());
 	}
+	/**
+	 * Update the properties file listing the installed sites
+	 * @return
+	 */
 	private boolean updateSiteProps() {
 		File sites = new File("/sdcard/Geoplicity/"+Constants.DEFAULT_SITE_PROPERTIES);
 		if (!sites.exists()) {
@@ -208,8 +272,8 @@ public class SiteUpdateThread extends Thread {
 		try {
 			Properties sitesProps = new Properties();
 			sitesProps.load(new FileInputStream(sites));
-			sitesProps.setProperty(updateData.getName(), updateData.getVersion());
-			sitesProps.save(new FileOutputStream(sites), "Updated "+updateData.getName());
+			sitesProps.setProperty(mUpdateData.getName(), mUpdateData.getVersion());
+			sitesProps.save(new FileOutputStream(sites), "Updated "+mUpdateData.getName());
 			Log.v(Constants.LOG_TAG,"updated "+sites);
 		} catch (IOException e) {
 			Log.e(Constants.LOG_TAG, "Failed to save"+sites, e);
@@ -220,21 +284,78 @@ public class SiteUpdateThread extends Thread {
 
 	}
 	public SiteUpdateData getUpdateData() {
-		return updateData;
+		return mUpdateData;
 	}
 	public void setUpdateData(SiteUpdateData updateData) {
-		this.updateData = updateData;
+		this.mUpdateData = updateData;
 	}
 	/**
 	 * 
+	 * @param complete
 	 */
-	public void pause() {
-		//TODO Implement
+	private void notifyUser() {
+		if (mContext == null) {
+			Log.e(Constants.LOG_TAG, "null context, cannot notify for site "+mUpdateData.getName());
+			return;
+		}
+		CharSequence contentTitle;		
+		CharSequence contentText = null;
+		int flags = 0;
+		if (mUpdateData.isUpdateComplete()) {
+			if (mUpdateData.isNewSite()) {
+				contentTitle = "Site Install Complete!";
+				contentText = "Successfully Installed Site "+mUpdateData.getName();
+			}
+			else {
+				contentTitle = "Site Update Complete!";
+				contentText = "Successfully Updates Site "+mUpdateData.getName();
+			}
+		}
+		else if (mUpdateData.isUpdateInProgress()) {
+			contentTitle = "Site Download in Progress";
+			contentText = "Currently downloading "+mUpdateData.getName();
+			flags = Notification.FLAG_ONGOING_EVENT;
+		}
+		else if (mUpdateData.hasError()) {
+			contentTitle = "Update Failed";
+			contentText = "Update for Site "+mUpdateData.getName()+" failed.";
+		}
+		else if (mUpdateData.hasUpdateStarted()) {
+			contentTitle = "Update Paused";
+			contentText = "Update for Site "+mUpdateData.getName()+" has been paused.";
+			flags = Notification.FLAG_ONGOING_EVENT;
+		}
+		else {
+			//No notification
+			return;
+		}
+		
+		String ns = Context.NOTIFICATION_SERVICE;
+		NotificationManager mNotificationManager = (NotificationManager) mContext.getSystemService(ns);
+		
+		int icon = R.drawable.icon;
+		long when = System.currentTimeMillis();
+
+		Notification notification = new Notification(icon, contentText, when);
+		notification.flags = flags;
+//		notification.defaults |= Notification.DEFAULT_SOUND;
+//		notification.defaults |= Notification.DEFAULT_VIBRATE;
+		
+		Context context = mContext.getApplicationContext();
+
+		Intent notificationIntent = new Intent(Constants.INTENT_ACTION_LAUNCH_SITE_UPDATE);
+		notificationIntent.putExtra(Constants.INTENT_EXTRA_SITE_UPDATE_NAME, mUpdateData.getName());
+
+		PendingIntent contentIntent = PendingIntent.getActivity(mContext, 0, notificationIntent, 0);
+
+		notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
+		mNotificationManager.notify(R.string.update_started, notification);
+		Log.d(Constants.LOG_TAG, "sending notification");
 	}
-	/**
-	 * 
-	 */
-	public void cancel() {
-		//TODO Implement
+	public boolean isCancel() {
+		return mCancel;
+	}
+	public void setCancel(boolean mCancel) {
+		this.mCancel = mCancel;
 	}
 }

@@ -87,6 +87,7 @@ public class MainUI extends Activity {
         //Bind to elements in the Layout
         bindToLayout();
         loadApplicationProperties();
+        Log.v(Constants.LOG_TAG, Property.dump());
     }
     
     
@@ -181,7 +182,7 @@ public class MainUI extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
     	switch (item.getItemId()) {
     	  case UPDATE_ID:
-    		  Intent updater = new Intent(Constants.INTENT_ACTION_LAUNCH_SITE_UPDATE);
+    		  Intent updater = new Intent(Constants.INTENT_ACTION_LAUNCH_SITE_UPDATER);
     		  startActivity(updater);
     		  break;
     	  case DAY_TIME_ID:
@@ -324,5 +325,13 @@ public class MainUI extends Activity {
         	}	
     	}
     	public void onNothingSelected(AdapterView parent){}
+    	
     }
+//    @Override
+//    public boolean onMenuItemSelected(int featureId, MenuItem item) {
+//
+//    	Intent i = new Intent(Constants.INTENT_ACTION_LAUNCH_SITE_UPDATER);
+//    	startActivity(i);
+//		return false;
+//    }
 }

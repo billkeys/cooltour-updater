@@ -1,10 +1,6 @@
 package geoplicity.cooltour.sites;
 
-import java.io.DataInputStream;
 import java.io.IOException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.Properties;
 /**
  * Wrapper around the properties file that contains site data.
  * 
@@ -12,16 +8,20 @@ import java.util.Properties;
  *
  */
 public class SiteData extends RemoteProperties{
-	//Properties props;
-//	String name;
-//	String updateUrl;
-//	String version;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	public static final String KEY_NAME = "name";
 	public static final String KEY_VERSION = "version";
+	public static final String KEY_NEW_VERSION = "new_version";
 	public static final String KEY_UPADATE_URL = "update_url";
+	protected boolean updateAvailable;
+	protected boolean updateStarted;
+	protected boolean updateComplete;
+	protected boolean newSite;
 	public SiteData() {
 		super();
-		//props = new Properties();
 	}
 	public SiteData(String locationUrl) throws IOException {
 		super(locationUrl);
@@ -43,5 +43,41 @@ public class SiteData extends RemoteProperties{
 	}
 	public void setVersion(String version) {
 		setProperty(KEY_VERSION, version);
+	}
+	public String getNewVersion() {
+		return getProperty(KEY_NEW_VERSION);
+	}
+	public void setNewVersion(String version) {
+		setProperty(KEY_NEW_VERSION, version);
+	}
+	public boolean isUpdateAvailable() {
+		return updateAvailable;
+	}
+	public void setUpdateAvailable(boolean updateAvailable) {
+		this.updateAvailable = updateAvailable;
+	}
+	public boolean isNewSite() {
+		return newSite;
+	}
+	public void setNewSite(boolean newSite) {
+		this.newSite = newSite;
+	}
+	public boolean hasUpdateStarted() {
+		return updateStarted;
+	}
+	public void setUpdateStarted(boolean updateStarted) {
+		this.updateStarted = updateStarted;
+	}
+	public boolean isUpdateComplete() {
+		return updateComplete;
+	}
+	public void setUpdateComplete(boolean updateComplete) {
+		this.updateComplete = updateComplete;
+	}
+	public String toString() {
+		return "[ SiteData :: "+super.toString() +
+		", updateAvailable="+updateAvailable+", " +
+		"newSite="+newSite+"," +
+		"updateStarted="+updateStarted+" ]";
 	}
 }

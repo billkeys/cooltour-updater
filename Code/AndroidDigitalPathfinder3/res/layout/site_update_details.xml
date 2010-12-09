@@ -1,90 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout 
-	android:id="@+id/RelativeLayout01" 
-	android:layout_width="fill_parent" 
-	android:layout_height="fill_parent" 
+<RelativeLayout android:id="@+id/RelativeLayout01"
+	android:layout_width="fill_parent" android:layout_height="fill_parent"
 	xmlns:android="http://schemas.android.com/apk/res/android">
-	<TextView
-		android:text="Name"  
-		android:id="@+id/site_update_details_name"
-		android:textSize="24sp" 
-		android:visibility="visible"
-		android:textColor="#FFFFFF"
-		android:textStyle="bold"
-		android:layout_width="wrap_content" 
-		android:layout_height="wrap_content">
-	</TextView>	
-	<TextView 
-		android:text="Version: "
-		android:id="@+id/site_update_version_label"
-		android:textSize="20sp"
-		android:visibility="visible"
-		android:layout_width="wrap_content" 
-		android:layout_height="wrap_content"
+	<TextView android:text="Name" android:id="@+id/site_update_details_name"
+		android:textSize="24sp" android:visibility="visible"
+		android:textColor="#FFFFFF" android:textStyle="bold"
+		android:layout_width="wrap_content" android:layout_height="wrap_content">
+	</TextView>
+	<TextView android:text="Version: " android:id="@+id/site_update_version_label"
+		android:textSize="20sp" android:visibility="visible"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
 		android:layout_below="@id/site_update_details_name">
 	</TextView>
-	<TextView 
-		android:text="2.3"  
-		android:textSize="20sp"
-		android:id="@+id/site_update_details_version" 
-		android:layout_width="wrap_content" 
-		android:layout_height="wrap_content"
-		android:layout_toRightOf="@id/site_update_version_label"
+	<TextView android:text="-2.3" android:textSize="20sp"
+		android:id="@+id/site_update_details_version" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:layout_toRightOf="@id/site_update_version_label"
 		android:layout_alignTop="@id/site_update_version_label">
 	</TextView>
-	<TextView
-		android:text="0" 
-		android:id="@+id/site_update_details_blocks"
-		android:textSize="20sp"
-		android:visibility="visible"
-		android:layout_width="wrap_content" 
-		android:layout_height="wrap_content"
+	<TextView android:text="-1" android:id="@+id/site_update_details_blocks"
+		android:textSize="20sp" android:visibility="visible"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
 		android:layout_below="@id/site_update_version_label">
 	</TextView>
-	<TextView 
-		android:text=" files"  
-		android:textSize="20sp"
-		android:visibility="visible"
-		android:layout_width="wrap_content" 
-		android:layout_height="wrap_content"
-		android:layout_toRightOf="@id/site_update_details_blocks"
+	<TextView android:text=" files" android:textSize="20sp"
+		android:visibility="visible" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:layout_toRightOf="@id/site_update_details_blocks"
 		android:layout_alignTop="@id/site_update_details_blocks">
 	</TextView>
-	<TextView 
-		android:text="12.34MB"
-		android:textSize="20sp"
-		android:visibility="visible"
-		android:id="@+id/site_update_details_size" 
-		android:layout_width="wrap_content" 
-		android:layout_height="wrap_content"
-		android:layout_marginBottom="30px"
-		android:layout_below="@id/site_update_details_blocks">
-	</TextView>	
-	<TextView
-		android:text="paused" 
-		android:id="@+id/site_update_status"
-		android:textSize="20sp"
-		android:visibility="gone"
-		android:layout_width="wrap_content" 
-		android:layout_height="wrap_content"
+	<TextView android:text="-1MB" android:textSize="20sp"
+		android:visibility="visible" android:id="@+id/site_update_details_size"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
+		android:layout_marginBottom="30px" android:layout_below="@id/site_update_details_blocks">
+	</TextView>
+	<TextView android:text="status" android:id="@+id/site_update_status"
+		android:textSize="20sp" android:visibility="visible"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
 		android:layout_below="@id/site_update_details_size">
 	</TextView>
-	<TextView
-		android:text="53%" 
-		android:id="@+id/site_update_progress"
-		android:textSize="20sp"
-		android:visibility="gone"
-		android:layout_width="wrap_content" 
-		android:layout_height="wrap_content"
+	<TextView android:text="-1%" android:id="@+id/site_update_progress"
+		android:textSize="20sp" android:visibility="visible"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
 		android:layout_below="@id/site_update_status">
 	</TextView>
-	<Button 
-	android:text="Start" 
-	android:textSize="24sp"
-	android:id="@+id/site_update_details_button" 
-	android:layout_width="fill_parent" 
-	android:layout_height="wrap_content"
-	android:layout_alignParentBottom="true"
-	android:onClick="startUpdate" ></Button>	
-	
+	<ProgressBar android:layout_width="fill_parent" android:layout_height="wrap_content" 
+    	android:id="@+id/update_progress_bar" android:max="100" android:layout_below="@id/site_update_progress"
+    	style="?android:attr/progressBarStyleHorizontal"
+    	android:orientation="horizontal"
+    	android:background="@android:drawable/progress_horizontal"
+    		 />
+	<Button android:text="Toggle" android:textSize="24sp"
+		android:id="@+id/site_update_toggle_button" android:layout_weight="50"
+		android:textColor="@color/green" android:layout_width="150px" android:layout_height="wrap_content"
+		android:onClick="toggleRun" android:layout_alignParentBottom="true"/>
+	<Button android:text="Cancel" android:id="@+id/site_update_cancel_button"
+		android:textSize="24sp" android:layout_weight="50"
+		android:layout_width="150px" android:layout_height="wrap_content" android:textColor="@color/red"
+		android:onClick="cancelUpdate" android:layout_alignParentRight="true"
+		android:layout_alignParentBottom="true"/>
 </RelativeLayout>
