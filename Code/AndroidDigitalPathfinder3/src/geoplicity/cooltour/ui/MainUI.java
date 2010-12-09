@@ -87,7 +87,6 @@ public class MainUI extends Activity {
         //Bind to elements in the Layout
         bindToLayout();
         loadApplicationProperties();
-        Log.v(Constants.LOG_TAG, Property.dump());
     }
     
     
@@ -102,7 +101,8 @@ public class MainUI extends Activity {
     
     /**
      * Method for handling button clicks on the "Begin Tour" Button
-     * 
+     * Initial check is made to ensure that the user has selected a site and a
+     * tour before beginning the tour. 
      * Currently has the responsibility of invoking the next Activity 
      *  {@link geoplicity.cooltour.ui.MapActivity}
      */
@@ -110,9 +110,21 @@ public class MainUI extends Activity {
     	public void onClick(View v) {
     		Logger.log(Logger.INPUT,"begin button clicked");
     		Logger.log(Logger.TRACE,"sending intent " + Constants.INTENT_ACTION_BEGIN_TOUR);
-    		loadSiteSpecificProperties();
-        	Intent intent = new Intent(Constants.INTENT_ACTION_BEGIN_TOUR);
-        	startActivity(intent);
+    		
+    		
+    		if(mSiteSelectionList.getSelectedItem() == null) {
+    			Toast.makeText(getApplicationContext(), "Please select a site and tour"
+    					, Toast.LENGTH_SHORT).show();
+    		}
+    		else if(mTourSelectionList.getSelectedItem() == null) {
+    			Toast.makeText(getApplicationContext(), "Please select a tour for "
+    					+mSelectedSite, Toast.LENGTH_SHORT).show();
+    		} 
+    		else{
+    			loadSiteSpecificProperties();
+            	Intent intent = new Intent(Constants.INTENT_ACTION_BEGIN_TOUR);
+            	startActivity(intent);
+    		}
     	}
     };
     
@@ -182,7 +194,7 @@ public class MainUI extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
     	switch (item.getItemId()) {
     	  case UPDATE_ID:
-    		  Intent updater = new Intent(Constants.INTENT_ACTION_LAUNCH_SITE_UPDATER);
+    		  Intent updater = new Intent(Constants.INTENT_ACTION_LAUNCH_SITE_UPDATE);
     		  startActivity(updater);
     		  break;
     	  case DAY_TIME_ID:
@@ -325,13 +337,5 @@ public class MainUI extends Activity {
         	}	
     	}
     	public void onNothingSelected(AdapterView parent){}
-    	
     }
-//    @Override
-//    public boolean onMenuItemSelected(int featureId, MenuItem item) {
-//
-//    	Intent i = new Intent(Constants.INTENT_ACTION_LAUNCH_SITE_UPDATER);
-//    	startActivity(i);
-//		return false;
-//    }
 }

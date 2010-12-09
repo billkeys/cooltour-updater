@@ -73,7 +73,7 @@ public class SiteUpdateThread extends Thread {
 	@Override
 	public void run() {
 		Log.v(Constants.LOG_TAG, "start run, mode="+mMode);
-		Log.d(Constants.LOG_TAG,Property.dump());
+		//Log.d(Constants.LOG_TAG,Property.dump());
 		mUpdateData.setStatusMessage("Downloading");
 		mUpdateData.setUpdateStarted(true);
 		mUpdateData.setUpdateInProgress(true);

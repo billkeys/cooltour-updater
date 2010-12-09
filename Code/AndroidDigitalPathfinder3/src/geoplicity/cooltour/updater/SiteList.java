@@ -54,7 +54,7 @@ public class SiteList extends ListActivity {
         if (Property.getProperty(Constants.PROPERTY_APP_ROOT_DIR) == null) {
         	Property.setProperty(Constants.PROPERTY_APP_ROOT_DIR, Constants.DEFAULT_APP_ROOT_DIR);
         }
-        Log.d(Constants.LOG_TAG,Property.dump());
+        //Log.d(Constants.LOG_TAG,Property.dump());
         //refreshList();
 //        ArrayList<SiteData> sites = getSites();
 //        if (sites.size() > 0) {
