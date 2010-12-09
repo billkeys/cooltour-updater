@@ -17,6 +17,8 @@ import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 /**
@@ -32,6 +34,14 @@ import android.widget.ListView;
  *
  */
 public class SiteList extends ListActivity {
+	/**
+	 * Menu item for launching "MaunUI" Activity
+	 */
+	private static final int MAIN_UI_ID = Menu.FIRST; 
+	/**
+	 * Menu item for launching "About Geoplicity" Activity
+	 */
+	private static final int ABOUT_ID = Menu.FIRST + 1;   
     public static ArrayList<SiteData> mSiteList;
 	private SiteListAdapter<SiteData> mSiteListAdapter;
 	protected void onCreate(Bundle savedInstanceState){
@@ -153,5 +163,26 @@ public class SiteList extends ListActivity {
 
       }
 	}
-	
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        menu.add(0, MAIN_UI_ID, 0, R.string.menu_home);
+        menu.add(0, ABOUT_ID, 0, R.string.menu_about);
+        return true;
+    }
+    @Override
+    public boolean onMenuItemSelected(int featureId, MenuItem item) {
+		Log.v(Constants.LOG_TAG, "menu item selected:"+featureId);
+    	switch (featureId) {
+    		case MAIN_UI_ID:
+    			Intent i = new Intent(Constants.INTENT_ACTION_MAIN_UI);
+    			startActivity(i); 
+    		break;
+    		case ABOUT_ID:
+    			//TODO Implement
+    		break;
+    		default:
+    	}
+    	return true;
+    }
 }
