@@ -1,6 +1,6 @@
 /**
- * @author - Abuelsaad and Goldsmith
- * 
+ * @author - Deyaa Abuelsaad and Sean Goldsmith
+ * @Date   - December 8th 2010
  */
 
 package geoplicity.cooltour.ui;
@@ -10,20 +10,18 @@ import geoplicity.cooltour.sites.NoWayPropsException;
 import geoplicity.cooltour.sites.SiteListCreator;
 import geoplicity.cooltour.sites.TourListCreator;
 import geoplicity.cooltour.util.Constants;
-
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
 import org.geoplicity.mobile.util.Logger;
 import org.geoplicity.mobile.util.Property;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -34,42 +32,54 @@ import android.widget.Spinner;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemSelectedListener;
 
+/**
+ * Main Activity for Digital Path Finder
+ *  Displays site selection list from site-props.txt
+ *  Displays tour selection list for each site
+ *  Displays button for starting tour
+ *  Displays button for quitting tour
+ */
 public class MainUI extends Activity {	
 	
 	//Menu item for launching "Updater" Activity
 	private static final int UPDATE_ID = Menu.FIRST; 
-	//Menu item for launching "About Geoplicity" Activity
-	private static final int ABOUT_ID = Menu.FIRST + 1;     
+	//Menu item for displaying day time screen
+	private static final int DAY_TIME_ID = Menu.FIRST + 1;
 	
 	//Button for "Begin Tour"
-	private Button m_BeginButton;	
+	private Button mBeginButton;	
 	//Button for "Quit Tour"
-	private Button m_QuitButton;    
+	private Button mQuitButton;    
 	
 	//Spinner for Site Selection
-	private Spinner m_SiteSelectionList;
+	private Spinner mSiteSelectionList;
 	//Adapter for connecting to Site Selection Spinner
-	private ArrayAdapter<CharSequence> m_SiteSelectionAdapter;
+	private ArrayAdapter<CharSequence> mSiteSelectionAdapter;
 	
 	//Spinner for Tour Selection
-	private Spinner m_TourSelectionList;
+	private Spinner mTourSelectionList;
 	//Adapter for connecting to Tour Selection Spinner
-	private ArrayAdapter<CharSequence> m_TourSelectionAdapter;
+	private ArrayAdapter<CharSequence> mTourSelectionAdapter;
 	//HashMap containing key and value pairs for list of tours and tour details
-	private HashMap<String, String> m_TourList;
+	private HashMap<String, String> mTourList;
 	
 	//CheckBox for Start Tour at Beginning
-	private CheckBox m_StartAtBegin;
+	private CheckBox mStartAtBegin;
 	
 	//Current Root Directory
-	private String m_RootDir;
+	private String mRootDir;
 	//Current Site Selection
-	private String m_SelectedSite;
+	private String mSelectedSite;
 	//Current Tour Selection
-	private String m_TourSelection;
+	private String mTourSelection;
 	
 	
-    @Override
+    /**
+     * Entry method of Activity
+     * 	Sets the display to use the layout {@link R.layout.main}
+     *  Binds reference variables to XML layout using method bindToLayout()
+     *  Loads the default application properties using loadApplicationProperties()
+     */
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //Set the Layout View to main.xml
@@ -83,7 +93,7 @@ public class MainUI extends Activity {
     /**
      * Method for handling button clicks on the "Quit Tour" Button
      */
-    private OnClickListener m_QuitTourListener = new OnClickListener() {
+    private OnClickListener mQuitTourListener = new OnClickListener() {
         public void onClick(View v) {
           System.exit(0);
         }
@@ -93,9 +103,9 @@ public class MainUI extends Activity {
      * Method for handling button clicks on the "Begin Tour" Button
      * 
      * Currently has the responsibility of invoking the next Activity 
-     *  (MapActivity)
+     *  {@link geoplicity.cooltour.ui.MapActivity}
      */
-    private OnClickListener m_BeginTourListener = new OnClickListener() {
+    private OnClickListener mBeginTourListener = new OnClickListener() {
     	public void onClick(View v) {
     		Logger.log(Logger.INPUT,"begin button clicked");
     		Logger.log(Logger.TRACE,"sending intent " + Constants.INTENT_ACTION_BEGIN_TOUR);
@@ -107,55 +117,84 @@ public class MainUI extends Activity {
     
     /**
      * Binds the following local reference variables to the XML Layout
-     *       Spinner m_SiteSelectionList --> R.id.SiteSelect
-     *       Spinner m_TourSelectionList --> R.id.TourSelect
-     *       Button m_BeginButton        --> R.id.begin_button
-     *       Button m_QuitButton         --> R.id.quit_button
+     *       Spinner mSiteSelectionList --> R.id.SiteSelect
+     *       Spinner mTourSelectionList --> R.id.TourSelect
+     *       Button mBeginButton        --> R.id.begin_button
+     *       Button mQuitButton         --> R.id.quit_button
+     *       CheckBox mStartAtBegin     --> R.id.StartTourBegin
      *       
      * Creates the following local reference variables for updating text on 
      * the display.
-     *       ArrayAdapter m_SiteSelectionAdapter --> Used to update Site List
-     *       ArrayAdapter m_TourSelectionAdapter --> Used to update Tour List
+     *       ArrayAdapter mSiteSelectionAdapter --> Used to update Site List
+     *       ArrayAdapter mTourSelectionAdapter --> Used to update Tour List
      */
     private void bindToLayout(){
     	//Configure Site Select Spinner
-    	m_SiteSelectionList = (Spinner) findViewById(R.id.SiteSelect);
-        m_SiteSelectionAdapter = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_spinner_item);
-        m_SiteSelectionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        m_SiteSelectionList.setAdapter(m_SiteSelectionAdapter);
-        m_SiteSelectionList.setOnItemSelectedListener(new SiteListSelectedListener());
+    	mSiteSelectionList = (Spinner) findViewById(R.id.SiteSelect);
+        mSiteSelectionAdapter = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_spinner_item);
+        mSiteSelectionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mSiteSelectionList.setAdapter(mSiteSelectionAdapter);
+        mSiteSelectionList.setOnItemSelectedListener(new SiteListSelectedListener());
         
         //Configure Tour Select Spinner
-        m_TourSelectionList = (Spinner) findViewById(R.id.TourSelect);
-        m_TourSelectionAdapter = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_spinner_item);
-        m_TourSelectionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        m_TourSelectionList.setAdapter(m_TourSelectionAdapter);
-        m_TourSelectionList.setOnItemSelectedListener(new TourListSelectedListener());
+        mTourSelectionList = (Spinner) findViewById(R.id.TourSelect);
+        mTourSelectionAdapter = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_spinner_item);
+        mTourSelectionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mTourSelectionList.setAdapter(mTourSelectionAdapter);
+        mTourSelectionList.setOnItemSelectedListener(new TourListSelectedListener());
         
         //Begin Tour Button
-        m_BeginButton = (Button)findViewById(R.id.begin_button); 
-        m_BeginButton.setOnClickListener(m_BeginTourListener);
+        mBeginButton = (Button)findViewById(R.id.begin_button); 
+        mBeginButton.setOnClickListener(mBeginTourListener);
         
         //Quit Tour Button
-        m_QuitButton = (Button)findViewById(R.id.quit_button);
-        m_QuitButton.setOnClickListener(m_QuitTourListener);
+        mQuitButton = (Button)findViewById(R.id.quit_button);
+        mQuitButton.setOnClickListener(mQuitTourListener);
         
         //Start Tour Beginning Check Box
-        m_StartAtBegin = (CheckBox)findViewById(R.id.StartTourBegin);
+        mStartAtBegin = (CheckBox)findViewById(R.id.StartTourBegin);
     }
     
     /**
-     * Used for handling the Menu Button
+     * Used for displaying the Menu Button
      * Displays two Options:
      *    1. Launching the Updater Activity
      *    2. Launching an Activity describing the Geoplicity project
+     *    3. Changing the display of the screen for the day time
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         menu.add(0, UPDATE_ID, 0, R.string.menu_updater);
-        menu.add(0, ABOUT_ID, 0, R.string.menu_about);
+        menu.add(0, DAY_TIME_ID, 0, R.string.menu_daytime);
         return true;
+    }
+    
+    /**
+     * Used for handling the Menu Button
+     *  If Menu option "Launch Updater" is selected:
+     *     The activity {@link Constants.INTENT_ACTION_LAUNCH_SITE_UPDATE} is started
+     *  If Menu option "Change Screen Daytime" is selected:
+     *     A new layout is displayed {@link R.layout.daytime}
+     *     The menu item is changed to display "Restore Defaults"
+     */
+    public boolean onOptionsItemSelected(MenuItem item) {
+    	switch (item.getItemId()) {
+    	  case UPDATE_ID:
+    		  Intent updater = new Intent(Constants.INTENT_ACTION_LAUNCH_SITE_UPDATE);
+    		  startActivity(updater);
+    		  break;
+    	  case DAY_TIME_ID:
+    		  if (item.getTitle().equals("Change Screen Daytime")){		  
+    			  setContentView(R.layout.daytime);
+    		  	  item.setTitle("Restore Default");
+    		  }
+    		  else {
+    			  setContentView(R.layout.main);
+    			  item.setTitle(R.string.menu_daytime);
+    		  }
+    	}
+		return super.onOptionsItemSelected(item);
     }
     
     /**
@@ -170,7 +209,7 @@ public class MainUI extends Activity {
     		List<String> siteList = siteCreator.getSiteChoices();
     		Iterator<String> siteListIterator = siteList.iterator();
     		while (siteListIterator.hasNext()){
-    			m_SiteSelectionAdapter.add(siteListIterator.next());
+    			mSiteSelectionAdapter.add(siteListIterator.next());
     		}
     	}
     	catch (NoSitePropsException loadDefault){
@@ -183,13 +222,15 @@ public class MainUI extends Activity {
      * Load the application properties (app-props.txt)
      * 
      *      app.root.dir        --> /Geoplicity
+     *
+     * Sets class variable {@link mRootDir} to value contained in app.root.dir
      *      
      * Invokes method (displaySiteSpecificProperties) to display available
      *  site choices to user.
      */
     private void loadApplicationProperties(){   
     	Property.loadProperties(Constants.DEFAULT_APP_PROPERTIES);
-    	m_RootDir = Property.getProperty(Constants.PROPERTY_APP_ROOT_DIR);   
+    	mRootDir = Property.getProperty(Constants.PROPERTY_APP_ROOT_DIR);   
         displaySiteSpecificProperties();
     }
     
@@ -208,20 +249,20 @@ public class MainUI extends Activity {
      *    - GPS Properties      --> /Geoplicity/site_selected/configs/nmea.txt
      */
     private void loadSiteSpecificProperties() {
-    	if (m_StartAtBegin.isChecked())
+    	if (mStartAtBegin.isChecked())
     		Property.setProperty("tour.sequence.enabled", "true");
     	else
     		Property.setProperty("tour.sequence.enabled", "false");
-    	Property.setProperty("tour.current", m_TourSelection);
-    	Property.loadProperties(m_RootDir + "/" + m_SelectedSite + Constants.DEFAULT_GEO_PROPERTIES);
-    	Log.v("LOAD SITE PROPERTIES", m_RootDir + "/" + m_SelectedSite + Constants.DEFAULT_GEO_PROPERTIES);
+    	Property.setProperty("tour.current", mTourSelection);
+    	Property.loadProperties(mRootDir + "/" + mSelectedSite + Constants.DEFAULT_GEO_PROPERTIES);
+    	Log.v("LOAD SITE PROPERTIES", mRootDir + "/" + mSelectedSite + Constants.DEFAULT_GEO_PROPERTIES);
     	Logger.init();	
-    	Logger.log(Logger.DEBUG, "Site root directory is: "+m_RootDir + "/" + m_SelectedSite);
-    	Property.setProperty("current.site", m_SelectedSite);
-    	Property.loadProperties(m_RootDir + "/" + m_SelectedSite + Property.getProperty("map.props"));
-    	Property.loadProperties(m_RootDir + "/" + m_SelectedSite + Property.getProperty("way.props"));
-    	Property.loadProperties(m_RootDir + "/" + m_SelectedSite + Property.getProperty("tri.props"));
-    	Property.loadProperties(m_RootDir + "/" + m_SelectedSite + Property.getProperty("gps.sim.file"));
+    	Logger.log(Logger.DEBUG, "Site root directory is: "+mRootDir + "/" + mSelectedSite);
+    	Property.setProperty("current.site", mSelectedSite);
+    	Property.loadProperties(mRootDir + "/" + mSelectedSite + Property.getProperty("map.props"));
+    	Property.loadProperties(mRootDir + "/" + mSelectedSite + Property.getProperty("way.props"));
+    	Property.loadProperties(mRootDir + "/" + mSelectedSite + Property.getProperty("tri.props"));
+    	Property.loadProperties(mRootDir + "/" + mSelectedSite + Property.getProperty("gps.sim.file"));
     }
     
     
@@ -238,11 +279,11 @@ public class MainUI extends Activity {
 
         public void onItemSelected(AdapterView<?> parent,
             View view, int pos, long id) {
-        	m_TourSelection = parent.getItemAtPosition(pos).toString();
-        	if(m_TourSelection != null)
+        	mTourSelection = parent.getItemAtPosition(pos).toString();
+        	if(mTourSelection != null)
         	{
         		Toast.makeText(parent.getContext(), "The tour selected is " +
-        			m_TourSelection+"\n" + m_TourList.get(m_TourSelection), Toast.LENGTH_LONG).show();
+        			mTourSelection+"\n" + mTourList.get(mTourSelection), Toast.LENGTH_LONG).show();
         	}
         }
 
@@ -254,7 +295,7 @@ public class MainUI extends Activity {
     /**
      * Button click handler used for grabbing selected tour from user.
      * 
-     * Modifies class attribute (m_SelectedSite) to contain the tour selected
+     * Modifies class attribute (mSelectedSite) to contain the tour selected
      *  by the user.
      *
      */
@@ -262,25 +303,22 @@ public class MainUI extends Activity {
     	
     	public void onItemSelected(AdapterView<?> siteListSpinner,
             View view, int pos, long id){
-    		m_TourSelectionAdapter.clear();
-    		m_SelectedSite = siteListSpinner.getItemAtPosition(pos).toString();
-    		TourListCreator tourCreator = new TourListCreator(m_SelectedSite);
+    		mTourSelectionAdapter.clear();
+    		mSelectedSite = siteListSpinner.getItemAtPosition(pos).toString();
+    		TourListCreator tourCreator = new TourListCreator(mSelectedSite);
     		try {
-    			m_TourList = tourCreator.getTourChoices();
-    			Set<String> tourListKeys = m_TourList.keySet();
+    			mTourList = tourCreator.getTourChoices();
+    			Set<String> tourListKeys = mTourList.keySet();
     			Iterator<String> tourListIterator = tourListKeys.iterator();
     			while(tourListIterator.hasNext()) {
-    				m_TourSelectionAdapter.add(tourListIterator.next());
+    				mTourSelectionAdapter.add(tourListIterator.next());
     			}
         	}
         	catch (NoWayPropsException loadDefault){
         		//TODO:
         		//Just display single site Staatsburg.
-        	}
-    		
-    		
+        	}	
     	}
-    	
     	public void onNothingSelected(AdapterView parent){}
     }
 }

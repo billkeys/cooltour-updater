@@ -52,6 +52,8 @@ public class SiteUpdateDetails extends Activity {
         Log.d(Constants.LOG_TAG, "SiteUpdateDetails onCreate()");
 
     }
+	
+	
 	/**
 	 * Get the site update data.  If the thread hasn't started, 
 	 * retrieve the data from the server otherwise get it from 
@@ -242,7 +244,7 @@ public class SiteUpdateDetails extends Activity {
         SiteData selectedSite = null;
         Intent i = getIntent();
         Bundle extras = i.getExtras();
-        if (extras.get(Constants.INTENT_EXTRA_SITE_UPDATE) != null) {
+        if (extras != null && extras.get(Constants.INTENT_EXTRA_SITE_UPDATE) != null) {
         	Log.v(Constants.LOG_TAG, extras.get(Constants.INTENT_EXTRA_SITE_UPDATE).toString());
         	//selectedSite = (SiteData) extras.get(Constants.INTENT_EXTRA_SITE_UPDATE);
         	Integer selectedSiteIndex = (Integer) extras.get(Constants.INTENT_EXTRA_SITE_UPDATE);
@@ -269,7 +271,7 @@ public class SiteUpdateDetails extends Activity {
             	diag.show();
             }
         }
-        else if (extras.get(Constants.INTENT_EXTRA_SITE_RUNNING_UPDATE) != null) {
+        else if (extras != null && extras.get(Constants.INTENT_EXTRA_SITE_RUNNING_UPDATE) != null) {
         	Log.v(Constants.LOG_TAG, mUpdate.toString());
         }
     }
