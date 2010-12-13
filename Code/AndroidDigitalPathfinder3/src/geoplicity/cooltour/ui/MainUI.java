@@ -17,6 +17,8 @@ import java.util.Set;
 import org.geoplicity.mobile.util.Logger;
 import org.geoplicity.mobile.util.Property;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -65,6 +67,9 @@ public class MainUI extends Activity {
 	
 	//CheckBox for Start Tour at Beginning
 	private CheckBox mStartAtBegin;
+	
+	//TAG for Activity
+	private static final String TAG = "MainUI";
 	
 	//Current Root Directory
 	private String mRootDir;
@@ -218,6 +223,9 @@ public class MainUI extends Activity {
      * Used for displaying the currently downloaded Site Plugins
      * Retrieves available site plugins (as a List<String>)
      *  from geoplicity.cooltour.sites.SiteListCreator()
+     *  
+     * If no Site plugins have been installed, a dialog window is displayed
+     *  asking if the user wishes to launch the Updater.
      * 
      */
 	private void displaySiteSpecificProperties(){
@@ -225,13 +233,30 @@ public class MainUI extends Activity {
     	try {
     		List<String> siteList = siteCreator.getSiteChoices();
     		Iterator<String> siteListIterator = siteList.iterator();
-    		while (siteListIterator.hasNext()){
+    		while (siteListIterator.hasNext()){;
     			mSiteSelectionAdapter.add(siteListIterator.next());
     		}
+    		
     	}
     	catch (NoSitePropsException loadDefault){
-    		//TODO:
-    		//Just display single site Staatsburg.
+    		AlertDialog.Builder builder = new AlertDialog.Builder(MainUI.this);
+			builder.setMessage("No Site Plugins have been installed.\n"+
+					"Do you wish to launch the Updater?")
+			       .setCancelable(false)
+			       .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+			           public void onClick(DialogInterface dialog, int id) {      	   
+			        	   Intent updater = new Intent(Constants.INTENT_ACTION_LAUNCH_SITE_UPDATER);
+			     		   startActivity(updater);
+			           }
+			       })
+			       .setNegativeButton("No", new DialogInterface.OnClickListener() {
+			           public void onClick(DialogInterface dialog, int id) {
+			                dialog.dismiss();
+			           }
+			       });
+					
+			AlertDialog alert = builder.create();
+			alert.show();
     	}
     }
     
@@ -304,9 +329,7 @@ public class MainUI extends Activity {
         	}
         }
 
-        public void onNothingSelected(AdapterView parent) {
-          // Do nothing.
-        }
+        public void onNothingSelected(AdapterView<?> parent) {}
     }
     
     /**
@@ -332,10 +355,9 @@ public class MainUI extends Activity {
     			}
         	}
         	catch (NoWayPropsException loadDefault){
-        		//TODO:
-        		//Just display single site Staatsburg.
+        		Log.e(TAG, "No way props found for "+mSelectedSite);
         	}	
     	}
-    	public void onNothingSelected(AdapterView parent){}
+    	public void onNothingSelected(AdapterView<?> parent){}
     }
 }
