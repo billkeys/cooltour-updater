@@ -47,8 +47,7 @@ public class SiteListCreator extends Properties {
 	public List<String> getSiteChoices() throws NoSitePropsException{
 		
 		List<String> sites = new Vector<String>();
-		String rootDir = Property.getProperty(Constants.PROPERTY_APP_ROOT_DIR); 
-		
+		String rootDir = Property.getProperty(Constants.PROPERTY_APP_ROOT_DIR);
 		try {
 			FileInputStream fis = new FileInputStream(new File(STORAGE_DEVICE+
 					"/"+rootDir+"/"+Constants.DEFAULT_SITE_PROPERTIES));
@@ -62,12 +61,12 @@ public class SiteListCreator extends Properties {
 				String site = siteListIterator.next();
 				if (site.contains("_")){
 					site = site.replaceAll("_", " ");
-					sites.add(site);
 				}
+				if (site.equals(Constants.DEFAULT_SITE))
+					sites.add(0, site);
 				else
 					sites.add(site);
 			}
-			
 			return sites;
 		} 
 		catch(FileNotFoundException noSiteProps){
