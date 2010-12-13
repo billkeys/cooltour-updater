@@ -34,7 +34,10 @@ public class Constants {
 	public static final int TEST_INTERVAL = 120;	//how many seconds the test case will run, 0 means indefinite
 	public static final String TEST_FILE = "/sdcard/test/log-2010-5-28.txt";
 	
-	//Updater Constats
+	//Default site to display to user
+	public static final String DEFAULT_SITE = "Staatsburgh";
+	
+	//Updater Constants
 	public static final String SDCARD_ROOT = "/sdcard";
 	//public static final String UPDATE_SERVER = "http://brendondrew.com/geoplicity/sites/";
 	public static final String UPDATE_SERVER = "http://reachforthestarsmcc.com/sdodge/files/sites/";
