@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2010 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package geoplicity.cooltour.map;
 
 import geoplicity.cooltour.gps.LocationManager;
@@ -142,14 +158,12 @@ public class AdvMapManager extends MapManager {
 		int x = this.getViewX() - tileX * Tile.width;
 		int y = this.getViewY() - tileY * Tile.height;
 
-		int width = (tileX + 1) * Tile.width - this.getViewX();
-		int height = (tileY + 1) * Tile.height - this.getViewY();
+		int tileWidth = (tileX + 1) * Tile.width - this.getViewX();
+		int tileHeight = (tileY + 1) * Tile.height - this.getViewY();
 
-		// 1 0
-		// 0 0
-		java.lang.Runtime.getRuntime().gc();
-		Bitmap bitmap = BitmapFactory.decodeFile(getTileName(UPPER_LEFT));
-		bitmap = Bitmap.createBitmap(bitmap, x, y, width, height);
+		// Upper left tile
+		Bitmap bitmap = BitmapFactory.decodeFile(getTileName(0));
+		bitmap = Bitmap.createBitmap(bitmap, x, y, tileWidth, tileHeight);
 
 		canvas.drawBitmap(bitmap, x, y, null);
 	}
@@ -173,19 +187,16 @@ public class AdvMapManager extends MapManager {
 		int tileWidth = (tileX + 1) * Tile.width - this.getViewX();
 		int tileHeight = (tileY + 1) * Tile.height - this.getViewY();
 
-		// 1 0
-		// 0 0
-		java.lang.Runtime.getRuntime().gc();
-		Bitmap bitmap = BitmapFactory.decodeFile(getTileName(UPPER_LEFT));
+		// Upper left tile
+		Bitmap bitmap = BitmapFactory.decodeFile(getTileName(0));
 		bitmap = Bitmap.createBitmap(bitmap, x, y, tileWidth, tileHeight);
 
 		canvas.drawBitmap(bitmap, x, y, null);
 
-		// 0 1
-		// 0 0
-		int w1 = Tile.width - tileWidth;
-		bitmap = BitmapFactory.decodeFile(getTileName(UPPER_RIGHT));
-		bitmap = Bitmap.createBitmap(bitmap, 0, y, w1, tileHeight);
+		// Upper right tile
+		int widthRight = Tile.width - tileWidth;
+		bitmap = BitmapFactory.decodeFile(getTileName(1));
+		bitmap = Bitmap.createBitmap(bitmap, 0, y, widthRight, tileHeight);
 
 		canvas.drawBitmap(bitmap, x + tileWidth, y, null);
 	}
@@ -209,19 +220,16 @@ public class AdvMapManager extends MapManager {
 		int tileWidth = (tileX + 1) * Tile.width - this.getViewX();
 		int tileHeight = (tileY + 1) * Tile.height - this.getViewY();
 
-		// 1 0
-		// 0 0
-		java.lang.Runtime.getRuntime().gc();
-		Bitmap bitmap = BitmapFactory.decodeFile(getTileName(UPPER_LEFT));
+		// Upper left tile
+		Bitmap bitmap = BitmapFactory.decodeFile(getTileName(0));
 		bitmap = Bitmap.createBitmap(bitmap, x, y, tileWidth, tileHeight);
 
 		canvas.drawBitmap(bitmap, x, y, null);
 
-		// 0 0
-		// 1 0
-		int heightLowerRight = Tile.height - tileHeight;
-		bitmap = BitmapFactory.decodeFile(getTileName(LOWER_RIGHT));
-		bitmap = Bitmap.createBitmap(bitmap, x, 0, tileWidth, heightLowerRight);
+		// Lower left tile
+		int heightLower = Tile.height - tileHeight;
+		bitmap = BitmapFactory.decodeFile(getTileName(2));
+		bitmap = Bitmap.createBitmap(bitmap, x, 0, tileWidth, heightLower);
 
 		canvas.drawBitmap(bitmap, x, y + tileHeight, null);
 	}
@@ -245,32 +253,27 @@ public class AdvMapManager extends MapManager {
 		int tileWidth = (tileX + 1) * Tile.width - this.getViewX();
 		int tileHeight = (titleY + 1) * Tile.height - this.getViewY();
 
-		// 1 0
-		// 0 0
-		java.lang.Runtime.getRuntime().gc();
+		// Upper left tile
 		Bitmap bitmap = BitmapFactory.decodeFile(getTileName(0));
 		bitmap = Bitmap.createBitmap(bitmap, x, y, tileWidth, tileHeight);
 
 		canvas.drawBitmap(bitmap, x, y, null);
 
-		// 0 1
-		// 0 0
+		// Upper right tile
 		int widthRight = Tile.width - tileWidth;
 		bitmap = BitmapFactory.decodeFile(getTileName(1));
 		bitmap = Bitmap.createBitmap(bitmap, 0, y, widthRight, tileHeight);
 
 		canvas.drawBitmap(bitmap, x + tileWidth, y, null);
 
-		// 0 0
-		// 1 0
+		// Lower left tile
 		int heightLower = Tile.height - tileHeight;
 		bitmap = BitmapFactory.decodeFile(getTileName(2));
 		bitmap = Bitmap.createBitmap(bitmap, x, 0, tileWidth, heightLower);
 
 		canvas.drawBitmap(bitmap, x, y + tileHeight, null);
 
-		// 0 0
-		// 0 1
+		// Lower right tile
 		bitmap = BitmapFactory.decodeFile(getTileName(3));
 		bitmap = Bitmap.createBitmap(bitmap, 0, 0, widthRight, heightLower);
 
