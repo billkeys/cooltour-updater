@@ -70,7 +70,7 @@ public class TourManager {
 	public void start()
 	{
 		//clean up the properties database
-		Property.recycleBut(m_criticalKeys);
+		//Property.recycleBut(m_criticalKeys);
 	}
 	private void loadTourPackages() {
 		// TODO Auto-generated method stub
