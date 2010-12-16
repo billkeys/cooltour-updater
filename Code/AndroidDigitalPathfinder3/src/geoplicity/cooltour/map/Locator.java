@@ -15,9 +15,9 @@
  */
 
 package geoplicity.cooltour.map;
-
+ 
 import org.geoplicity.mobile.util.Logger;
-
+ 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -30,7 +30,7 @@ import geoplicity.cooltour.game.Sprite;
 import geoplicity.cooltour.gps.LocationManager;
 import geoplicity.cooltour.util.*;
 import geoplicity.cooltour.ui.R;
-
+ 
 /**
  * This class implement's the user icon (or locator) which gives the position
  * on the map. The location actually consists of two parts: the animated graphic
@@ -39,7 +39,7 @@ import geoplicity.cooltour.ui.R;
  *
  */
 public class Locator{
-
+ 
 	//Polygon dimensions (i.e., the triangle size)
 	private final int POLY_HT = 25;
 	private final int POLY_BASE = 20;
@@ -48,33 +48,33 @@ public class Locator{
     //Polygon main color and shadow color
     private final int PAINT_COLOR = Color.RED;
     private final int PAINT_SHADOW_COLOR = Color.BLACK;
-
+ 
     //Animated graphic width and height
     private final int SPRITE_WIDTH = 33;
     private final int SPRITE_HEIGHT = 33;
     private final int SPRITE_ID = R.drawable.visitor_anim3;
-
+ 
     // Animated graphic
-    private Sprite m_Sprite = null;
-
+    private Sprite sprite = null;
+ 
     // Pointer polygons which in our case are triangle shapes
-    private Point[] m_Vertices = null;
-    private Point[] m_ShadowVertices = null;
-
+    private Point[] vertices = null;
+    private Point[] shadowVertices = null;
+ 
     // Current world position
-    private int m_WorldX = -1;
-    private int m_WorldY = -1;
-
+    private int worldX = -1;
+    private int worldY = -1;
+ 
     // Old world position
-    private int m_OldWorldX = -1;
-    private int m_OldWorldY = -1;
+    private int oldWorldX = -1;
+    private int oldWorldY = -1;
   
     //Paints for the polygon pointer
-    private Paint m_Paint = new Paint();
-    private Paint m_PaintShadow = new Paint();
+    private Paint paint = new Paint();
+    private Paint paintShadow = new Paint();
     
     // Reference to the map manager to retrieve view info
-    private MapManager m_MapMgr = null;
+    private MapManager mapMgr = null;
     
     /**
      * Constructor
@@ -84,21 +84,21 @@ public class Locator{
     public Locator(Context context, MapManager mapmgr){
     	Logger.log(Logger.DEBUG, "constructor");
     	
-    	m_MapMgr = mapmgr;    	
+    	mapMgr = mapmgr;    	
     	
     	Bitmap img = BitmapFactory.decodeResource(context.getResources(), SPRITE_ID);
-    	m_Sprite = new Sprite(context, img, SPRITE_WIDTH, SPRITE_HEIGHT);
+    	sprite = new Sprite(context, img, SPRITE_WIDTH, SPRITE_HEIGHT);
     	
     	//Initialize the arrays
-    	m_Vertices = new Point[3];
-    	m_ShadowVertices = new Point[3];
-    	for(int i=0; i<m_Vertices.length; i++){
-    		m_Vertices[i] = new Point();
-    		m_ShadowVertices[i] = new Point();
+    	vertices = new Point[3];
+    	shadowVertices = new Point[3];
+    	for(int i=0; i<vertices.length; i++){
+    		vertices[i] = new Point();
+    		shadowVertices[i] = new Point();
     	}
     	
-    	m_Paint.setColor(PAINT_COLOR);
-    	m_PaintShadow.setColor(PAINT_SHADOW_COLOR);
+    	paint.setColor(PAINT_COLOR);
+    	paintShadow.setColor(PAINT_SHADOW_COLOR);
     }
     
     /**
@@ -107,13 +107,13 @@ public class Locator{
      * @param y The Y coordinate in the world
      */
     public void update(int x, int y){
-    	m_OldWorldX = m_WorldX;
-        m_OldWorldY = m_WorldY;
-
-        m_WorldX = x;
-        m_WorldY = y;
+    	oldWorldX = worldX;
+        oldWorldY = worldY;
+ 
+        worldX = x;
+        worldY = y;
         
-        m_Sprite.nextFrame();
+        sprite.nextFrame();
     }
     
     /**
@@ -139,13 +139,13 @@ public class Locator{
         }
         
         //Center sprite (on top) around it's screen coordinate
-        int scrX = m_WorldX - m_MapMgr.getViewX();
-        int scrY = m_WorldY - m_MapMgr.getViewY();
+        int scrX = worldX - mapMgr.getViewX();
+        int scrY = worldY - mapMgr.getViewY();
         
-        m_Sprite.setX(scrX - SPRITE_WIDTH / 2);
-        m_Sprite.setY(scrY - SPRITE_HEIGHT / 2);
+        sprite.setX(scrX - SPRITE_WIDTH / 2);
+        sprite.setY(scrY - SPRITE_HEIGHT / 2);
         
-        m_Sprite.draw(canvas);
+        sprite.draw(canvas);
         
     }
     
@@ -169,28 +169,28 @@ public class Locator{
         // It's normalized in the sense that initially it's always upright
         // with the center at (0,0). Then, given theta, we rotate it locally
         // and translate to its world coordinate, (x,y).
-
+ 
     	// Get screen coordinates (again!)
-    	int scrX = m_WorldX - m_MapMgr.getViewX();
-    	int scrY = m_WorldY - m_MapMgr.getViewY();
+    	int scrX = worldX - mapMgr.getViewX();
+    	int scrY = worldY - mapMgr.getViewY();
     	
     	Logger.log(Logger.DEBUG, "drawPoly()");
     	Logger.log(Logger.DEBUG, "screen coordinates: ("+scrX+","+scrY+")");
-    	Logger.log(Logger.DEBUG, "current world coordinates: ("+m_WorldX+","+m_WorldY+")");
-    	Logger.log(Logger.DEBUG, "old world coordinates: ("+m_OldWorldX+","+m_OldWorldY+")");
+    	Logger.log(Logger.DEBUG, "current world coordinates: ("+worldX+","+worldY+")");
+    	Logger.log(Logger.DEBUG, "old world coordinates: ("+oldWorldX+","+oldWorldY+")");
     	
     	// If the position has changed, update the poly
-        if (m_OldWorldX != m_WorldX || m_OldWorldY != m_WorldY){
+        if (oldWorldX != worldX || oldWorldY != worldY){
         	// First reset the poly at its initial position
             vertices[0].x = 0;
             vertices[0].y = -POLY_HT / 2;
-
+ 
             vertices[1].x = POLY_BASE / 2;
             vertices[1].y = POLY_HT / 2;
-
+ 
             vertices[2].x = -POLY_BASE / 2;
             vertices[2].y = POLY_HT / 2;
-
+ 
             // Get the bearing and rotate each vertex respectively
             double theta = LocationManager.GetInstance().getBearing();        
             
@@ -202,14 +202,14 @@ public class Locator{
             // offset (for the shadow).
             vertices[0].x += scrX + xoff;
             vertices[0].y += scrY + yoff;
-
+ 
             vertices[1].x += scrX + xoff;
             vertices[1].y += scrY + yoff;
-
+ 
             vertices[2].x += scrX + xoff;
             vertices[2].y += scrY + yoff;            
         }
-
+ 
     	//render the poly
         Path path = new Path();
         path.moveTo(vertices[0].x, vertices[0].y);
@@ -218,5 +218,6 @@ public class Locator{
         
         canvas.drawPath(path, paint);
     }
-
+ 
 }
+ 
