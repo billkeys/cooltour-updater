@@ -1,3 +1,29 @@
+/**
+ * Copyright (c) 2010 Contributors, http://geoplicity.org/
+ * See CONTRIBUTORS.TXT for a full list of copyright holders.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Geoplicity Project nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE DEVELOPERS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 package geoplicity.cooltour.updater;
 
 import geoplicity.cooltour.sites.SiteData;
@@ -23,49 +49,58 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 /**
- * This activity will act as a controller for managing a site update and 
- * will be invoked by a user selecting a site from the site list.
- * Specific site actions will be controlled from this activity, and the 
- * available actions will depend on the sites state.
- * <br>
- * 1)The site is up-to-date - Display site info (i.e. version)
- * 2)The site is new or downlevel - Display an Install/Update button to begin the update/ 
- * to start, cancel, pause and update.
- * 3)Update in progress - Display a progress bar, and a cancel button
- * 4)Update in progress (paused) - Display a progress bar, and a resume button
- * 5)Update Complete - Display update info, i.e. total time.
- * 6)Update Failed - Display error message, and a restart button
+ * This activity will act as a controller for managing a site update and will be
+ * invoked by a user selecting a site from the site list. Specific site actions
+ * will be controlled from this activity, and the available actions will depend
+ * on the sites state. <br>
+ * 1)The site is up-to-date - Display site info (i.e. version) 2)The site is new
+ * or downlevel - Display an Install/Update button to begin the update/ to
+ * start, cancel, pause and update. 3)Update in progress - Display a progress
+ * bar, and a cancel button 4)Update in progress (paused) - Display a progress
+ * bar, and a resume button 5)Update Complete - Display update info, i.e. total
+ * time. 6)Update Failed - Display error message, and a restart button
  * 
  * @author Brendon Drew (b.j.drew@gmail.com)
- *
+ * 
  */
 public class SiteUpdateDetails extends Activity {
 	/**
 	 * Menu item for launching "MaunUI" Activity
 	 */
-	private static final int MAIN_UI_ID = Menu.FIRST; 
+	private static final int MAIN_UI_ID = Menu.FIRST;
 	/**
 	 * Menu item for launching "About Geoplicity" Activity
 	 */
-	private static final int ABOUT_ID = Menu.FIRST + 1;     
-	static SiteUpdateData sUpdate;
-	static int selectedSiteIndex;
-	static SiteUpdateThread sUpdateThread;
-	//private SiteUpdaterService mUpdaterService;
-	private ViewThread mViewThread;
+	private static final int ABOUT_ID = Menu.FIRST + 1;
 	/**
-	 * 
+	 * Details for the site being displayed
 	 */
-	protected void onCreate(Bundle savedInstanceState){
-        super.onCreate(savedInstanceState);
-        Log.d(Constants.LOG_TAG, "SiteUpdateDetails onCreate()");
-    }
-	
-	
+	static SiteUpdateData sUpdate;
 	/**
-	 * Get the site update data.  If the thread hasn't started, 
-	 * retrieve the data from the server otherwise get it from 
-	 * the thread.
+	 * The index of the selected site from the SiteList Activity
+	 */
+	static int sSelectedSiteIndex;
+	/**
+	 * The thread
+	 */
+	static SiteUpdateThread sUpdateThread;
+	/**
+	 * The thread that updates this activity's view
+	 */
+	private ViewThread mViewThread;
+
+	/**
+	 * @param savedInstanceState
+	 */
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		Log.d(Constants.LOG_TAG, "SiteUpdateDetails onCreate()");
+	}
+
+	/**
+	 * Get the site update data. If the thread hasn't started, retrieve the data
+	 * from the server otherwise get it from the thread.
+	 * 
 	 * @param site
 	 * @return
 	 */
@@ -73,14 +108,17 @@ public class SiteUpdateDetails extends Activity {
 		Log.d(Constants.LOG_TAG, "SiteUpdateDetails getSiteUpdateData()");
 		if (site == null)
 			return null;
-		Log.d(Constants.LOG_TAG, "SiteUpdateDetails getSiteUpdateData() incoming site:"+site.toString());
+		Log.d(Constants.LOG_TAG,
+				"SiteUpdateDetails getSiteUpdateData() incoming site:"
+						+ site.toString());
 		SiteUpdateData su = null;
 		if (SiteUpdateManager.getInstance(this).containsUpdate(site.getName())) {
-			su = SiteUpdateManager.getInstance(this).getUpdateThread(site.getName()).getUpdateData();
-		}
-		else {
-			String siteUpdateProperties = Constants.UPDATE_SERVER+
-			site.getName()+"/"+site.getNewVersion()+"/"+site.getName()+Constants.UPDATE_FILE_EXT; 
+			su = SiteUpdateManager.getInstance(this)
+					.getUpdateThread(site.getName()).getUpdateData();
+		} else {
+			String siteUpdateProperties = Constants.UPDATE_SERVER
+					+ site.getName() + "/" + site.getNewVersion() + "/"
+					+ site.getName() + Constants.UPDATE_FILE_EXT;
 
 			try {
 				su = new SiteUpdateData(siteUpdateProperties, site);
@@ -90,41 +128,45 @@ public class SiteUpdateDetails extends Activity {
 		}
 		return su;
 	}
+
 	/**
 	 * Invoked when pressing the start
+	 * 
 	 * @param v
 	 */
 	public void toggleRun(View v) {
 		SiteUpdateManager mgr = SiteUpdateManager.getInstance();
 		SiteUpdateThread uThread = mgr.getUpdateThread(sUpdate, this);
 		/*
-		if (mUpdaterService != null) {
-			Log.d(Constants.LOG_TAG, "we have the service!");
-		}
-		else 
-			Log.d(Constants.LOG_TAG, "no service!");
-		*/
+		 * if (mUpdaterService != null) { Log.d(Constants.LOG_TAG,
+		 * "we have the service!"); } else Log.d(Constants.LOG_TAG,
+		 * "no service!");
+		 */
 		if (!uThread.isAlive()) {
-			Log.v(Constants.LOG_TAG," starting update "+sUpdate.getName()+"");
+			Log.v(Constants.LOG_TAG, " starting update " + sUpdate.getName()
+					+ "");
 			mgr.startUpdate(sUpdate, this);
-		}
-		else {
-			Log.v(Constants.LOG_TAG," pausing update "+sUpdate.getName()+"");
+		} else {
+			Log.v(Constants.LOG_TAG, " pausing update " + sUpdate.getName()
+					+ "");
 			uThread.interrupt();
 		}
 		startViewUpdater();
 	}
+
 	/**
 	 * 
 	 * @param v
 	 */
 	public void cancelUpdate(View v) {
-		Log.v(Constants.LOG_TAG," cancelling update "+sUpdate.getName()+"");
-		SiteUpdateThread upd = SiteUpdateManager.getInstance().getUpdateThread(sUpdate, this);
-		
+		Log.v(Constants.LOG_TAG, " cancelling update " + sUpdate.getName() + "");
+		SiteUpdateThread upd = SiteUpdateManager.getInstance().getUpdateThread(
+				sUpdate, this);
+
 		upd.setCancel(true);
 		upd.interrupt();
 	}
+
 	/**
 	 * 
 	 */
@@ -133,97 +175,98 @@ public class SiteUpdateDetails extends Activity {
 		mViewThread.start();
 
 	}
+
 	/**
 	 * Updates the current view based on the state of the update
+	 * TODO cleanup by making the layout elements instance variables
 	 */
-	private void updateView () {
+	private void updateView() {
 		setContentView(R.layout.site_update_details);
-		/**
-		 * Get the Views
-		 */
-        TextView name = (TextView) findViewById(R.id.site_update_details_name);
-        TextView version = (TextView) findViewById(R.id.site_update_details_version);
-        TextView blocks = (TextView) findViewById(R.id.site_update_details_blocks);
-        TextView progress = (TextView) findViewById(R.id.site_update_progress);
-        TextView size = (TextView) findViewById(R.id.site_update_details_size);
-        TextView statusText = (TextView) findViewById(R.id.site_update_status);
-        ProgressBar progressBar = (ProgressBar) findViewById(R.id.update_progress_bar);
-        ProgressBar progressSpinner = (ProgressBar) findViewById(R.id.update_progress_spinner);
-        Button toggleRunButton = (Button) findViewById(R.id.site_update_toggle_button);
-        Button cancelButton = (Button) findViewById(R.id.site_update_cancel_button);
-
-        name.setText(sUpdate.getName().replaceAll("_", " "));
-        version.setText(sUpdate.getVersion());
-        blocks.setText(sUpdate.getBlockCount()+"");
-        progressBar.setVisibility(View.GONE);
-        progressSpinner.setVisibility(View.GONE);
-        size.setText(Utilities.parseBytesToHumanString(sUpdate.getFileSize()));
-        statusText.setVisibility(View.VISIBLE);
-        statusText.setText(sUpdate.getStatusMessage());
-        //progress.setText(Integer.toString(sUpdate.getCurrentBlock())+" of "+sUpdate.getBlockCount());
-        progress.setVisibility(View.INVISIBLE);
-    	int level = 0;
-    	if (sUpdate.getCurrentBlock() > 1) {
-    		double p =(( (double) sUpdate.getCurrentBlock()-1.0)/ (double) sUpdate.getBlockCount())*100.0;
-    		level = (int)p;
-    	}
-
-        
-		if (sUpdate.isUpdateComplete()) {
-        	toggleRunButton.setVisibility(View.GONE);
-        	cancelButton.setVisibility(View.GONE);
+		
+		// Get the layout elements
+		TextView name = (TextView) findViewById(R.id.site_update_details_name);
+		TextView version = (TextView) findViewById(R.id.site_update_details_version);
+		TextView blocks = (TextView) findViewById(R.id.site_update_details_blocks);
+		TextView progress = (TextView) findViewById(R.id.site_update_progress);
+		TextView size = (TextView) findViewById(R.id.site_update_details_size);
+		TextView statusText = (TextView) findViewById(R.id.site_update_status);
+		ProgressBar progressBar = (ProgressBar) findViewById(R.id.update_progress_bar);
+		ProgressBar progressSpinner = (ProgressBar) findViewById(R.id.update_progress_spinner);
+		Button toggleRunButton = (Button) findViewById(R.id.site_update_toggle_button);
+		Button cancelButton = (Button) findViewById(R.id.site_update_cancel_button);
+		
+		// Set defaults
+		name.setText(sUpdate.getName().replaceAll("_", " "));
+		version.setText(sUpdate.getVersion());
+		blocks.setText(sUpdate.getBlockCount() + "");
+		progressBar.setVisibility(View.GONE);
+		progressSpinner.setVisibility(View.GONE);
+		size.setText(Utilities.parseBytesToHumanString(sUpdate.getFileSize()));
+		statusText.setVisibility(View.VISIBLE);
+		statusText.setText(sUpdate.getStatusMessage());
+		progress.setVisibility(View.INVISIBLE);
+		
+		// Calculate the download percentage
+		int downloadPercentage = 0;
+		if (sUpdate.getCurrentBlock() > 1) {
+			double p = (((double) sUpdate.getCurrentBlock() - 1.0) / (double) sUpdate
+					.getBlockCount()) * 100.0;
+			downloadPercentage = (int) p;
 		}
-		else if (sUpdate.isUpdateInProgress()) {
+		
+		// Update elements based on the update's state
+		if (sUpdate.isUpdateComplete()) {
+			toggleRunButton.setVisibility(View.GONE);
+			cancelButton.setVisibility(View.GONE);
+		} else if (sUpdate.isUpdateInProgress()) {
 			toggleRunButton.setText(R.string.pause_update);
-        	toggleRunButton.setVisibility(View.VISIBLE);
-        	cancelButton.setVisibility(View.VISIBLE);
-        	if (sUpdate.getCurrentMode() > SiteUpdateThread.MODE_RESUME) {
-        		progressSpinner.setVisibility(View.VISIBLE);
-        		progressBar.setVisibility(View.GONE);
-        	}
-        	else {
-                progressBar.setProgress(level);
-                progressBar.setVisibility(View.VISIBLE);
-        	}
-        }
-        else {
-            if (!sUpdate.isUpdateAvailable() && !sUpdate.isNewSite()) {
-            	toggleRunButton.setVisibility(View.GONE);
-            	progress.setVisibility(View.GONE);
-            }
-            else if (sUpdate.hasUpdateStarted()) {
-            	toggleRunButton.setText(R.string.resume_update);
-            	progressBar.setVisibility(View.VISIBLE);
-            	progressBar.setProgress(level);
-            }
-            else if (sUpdate.hasError()) {
-            	toggleRunButton.setText(R.string.retry_update);
-            }
-            else {
-                statusText.setVisibility(View.GONE);
-                progress.setVisibility(View.GONE);
-            	toggleRunButton.setText(R.string.start_update);
-            }
-            cancelButton.setVisibility(View.GONE);
-           	if (mViewThread != null) {
-           		mViewThread.interrupt();
-           	}
-        }
-        onContentChanged();
-
+			toggleRunButton.setVisibility(View.VISIBLE);
+			cancelButton.setVisibility(View.VISIBLE);
+			if (sUpdate.getCurrentMode() > SiteUpdateThread.MODE_RESUME) {
+				progressSpinner.setVisibility(View.VISIBLE);
+				progressBar.setVisibility(View.GONE);
+			} else {
+				progressBar.setProgress(downloadPercentage);
+				progressBar.setVisibility(View.VISIBLE);
+			}
+		} else {
+			if (!sUpdate.isUpdateAvailable() && !sUpdate.isNewSite()) {
+				toggleRunButton.setVisibility(View.GONE);
+				progress.setVisibility(View.GONE);
+			} else if (sUpdate.hasUpdateStarted()) {
+				toggleRunButton.setText(R.string.resume_update);
+				progressBar.setVisibility(View.VISIBLE);
+				progressBar.setProgress(downloadPercentage);
+			} else if (sUpdate.hasError()) {
+				toggleRunButton.setText(R.string.retry_update);
+			} else {
+				statusText.setVisibility(View.GONE);
+				progress.setVisibility(View.GONE);
+				toggleRunButton.setText(R.string.start_update);
+			}
+			cancelButton.setVisibility(View.GONE);
+			if (mViewThread != null) {
+				mViewThread.interrupt();
+			}
+		}
+		onContentChanged();
 	}
+
 	/**
 	 * Thread for updating this activity's view.
+	 * 
 	 * @author Brendon Drew (b.j.drew@gmail.com)
-	 *
+	 * 
 	 */
 	protected class ViewThread extends Thread {
 		int sLastMode = 0;
+
 		@Override
 		public void run() {
-			try{ 
+			try {
 				while (sUpdate.isUpdateInProgress()) {
-					//After the download finished, only update the view as we step through each mode
+					// After the download finished, only update the view as we
+					// step through each mode
 					if (sUpdate.getCurrentMode() >= SiteUpdateThread.MODE_REASSEMBLE
 							&& sUpdate.getCurrentMode() == sLastMode) {
 						continue;
@@ -232,172 +275,188 @@ public class SiteUpdateDetails extends Activity {
 					sleep(500);
 					sLastMode = sUpdate.getCurrentMode();
 				}
-				//Update once more after we exit the loop
+				// Update once more after we exit the loop
 				handler.sendEmptyMessage(0);
+			} catch (InterruptedException e) {
+				Log.d(Constants.LOG_TAG, "viewThread interuppted");
 			}
-			catch(InterruptedException e) { 
-				Log.d(Constants.LOG_TAG,"viewThread interuppted");
-			}
-			Log.d(Constants.LOG_TAG,"viewThread terminating");
+			Log.d(Constants.LOG_TAG, "viewThread terminating");
 		}
 	}
+
 	/**
 	 * 
 	 */
-    private Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-    		updateView();
-        }
-    };
-    /**
+	private Handler handler = new Handler() {
+		@Override
+		public void handleMessage(Message msg) {
+			updateView();
+		}
+	};
+
+	/**
      * 
      */
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        super.onCreateOptionsMenu(menu);
-        menu.add(0, MAIN_UI_ID, 0, R.string.menu_home);
-        menu.add(0, ABOUT_ID, 0, R.string.menu_about);
-        return true;
-    }
-    @Override
-    public boolean onMenuItemSelected(int featureId, MenuItem item) {
-		Log.v(Constants.LOG_TAG, "menu item selected:"+featureId);
-    	switch (featureId) {
-    		case MAIN_UI_ID:
-    			Intent i = new Intent(Constants.INTENT_ACTION_MAIN_UI);
-    			startActivity(i); 
-    		break;
-    		case ABOUT_ID:
-    			//TODO Implement
-    		break;
-    		default:
-    	}
-    	return true;
-    }
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		super.onCreateOptionsMenu(menu);
+		menu.add(0, MAIN_UI_ID, 0, R.string.menu_home);
+		menu.add(0, ABOUT_ID, 0, R.string.menu_about);
+		return true;
+	}
+
+	@Override
+	public boolean onMenuItemSelected(int featureId, MenuItem item) {
+		Log.v(Constants.LOG_TAG, "menu item selected:" + featureId);
+		switch (featureId) {
+		case MAIN_UI_ID:
+			Intent i = new Intent(Constants.INTENT_ACTION_MAIN_UI);
+			startActivity(i);
+			break;
+		case ABOUT_ID:
+			// TODO Implement
+			break;
+		default:
+		}
+		return true;
+	}
+
 	@Override
 	protected void onPause() {
 		// TODO Auto-generated method stub
 		super.onPause();
 	}
+
 	@Override
 	protected void onRestart() {
 		// TODO Auto-generated method stub
 		super.onRestart();
 		Log.d(Constants.LOG_TAG, "SiteUpdateDetails onRestart()");
 	}
+
 	@Override
 	protected void onResume() {
 		Log.d(Constants.LOG_TAG, "SiteUpdateDetails onResume()");
 		// TODO Auto-generated method stub
 		super.onResume();
-        SiteData selectedSite = null;
-        Intent i = getIntent();
-        Bundle extras = i.getExtras();
-        //Integer selectedSiteIndex;
-    	if (extras != null && extras.get(Constants.INTENT_EXTRA_SITE_UPDATE) != null) {
-    		Log.v(Constants.LOG_TAG, "extra="+Constants.INTENT_EXTRA_SITE_UPDATE);
-    		selectedSiteIndex = (Integer) extras.get(Constants.INTENT_EXTRA_SITE_UPDATE);
-        	selectedSite = SiteList.mSiteList.get(selectedSiteIndex);
-            sUpdate = getSiteUpdateData(selectedSite);
-    	}
-    	else if (extras != null && extras.get(Constants.INTENT_EXTRA_SITE_UPDATE_NAME) != null) {
-    		Log.v(Constants.LOG_TAG, "extra="+Constants.INTENT_EXTRA_SITE_UPDATE_NAME);
-    		String siteName = (String)extras.get(Constants.INTENT_EXTRA_SITE_UPDATE_NAME);
-            sUpdate = SiteUpdateManager.getInstance().getUpdateThread(siteName).getUpdateData();
-    	}
-    	else {
-    		Log.e(Constants.LOG_TAG, "No reference to an update!");
-    	}
+		SiteData selectedSite = null;
+		Intent i = getIntent();
+		Bundle extras = i.getExtras();
+		// Integer selectedSiteIndex;
+		if (extras != null
+				&& extras.get(Constants.INTENT_EXTRA_SITE_UPDATE) != null) {
+			Log.v(Constants.LOG_TAG, "extra="
+					+ Constants.INTENT_EXTRA_SITE_UPDATE);
+			sSelectedSiteIndex = (Integer) extras
+					.get(Constants.INTENT_EXTRA_SITE_UPDATE);
+			selectedSite = SiteList.mSiteList.get(sSelectedSiteIndex);
+			sUpdate = getSiteUpdateData(selectedSite);
+		} else if (extras != null
+				&& extras.get(Constants.INTENT_EXTRA_SITE_UPDATE_NAME) != null) {
+			Log.v(Constants.LOG_TAG, "extra="
+					+ Constants.INTENT_EXTRA_SITE_UPDATE_NAME);
+			String siteName = (String) extras
+					.get(Constants.INTENT_EXTRA_SITE_UPDATE_NAME);
+			sUpdate = SiteUpdateManager.getInstance().getUpdateThread(siteName)
+					.getUpdateData();
+		} else {
+			Log.e(Constants.LOG_TAG, "No reference to an update!");
+		}
 
-        if (sUpdate != null) {
-    		Log.d(Constants.LOG_TAG, "SiteUpdateDetails displaying:"+sUpdate.toString());
-    		startViewUpdater();   	
-        	if (sUpdate.isUpdateInProgress()) {
-        		//setContentView(R.layout.site_update_in_progress_details);
-        		startViewUpdater();
-        	}
-        	else {
-        		updateView();
-        	}
+		if (sUpdate != null) {
+			Log.d(Constants.LOG_TAG,
+					"SiteUpdateDetails displaying:" + sUpdate.toString());
+			startViewUpdater();
+			if (sUpdate.isUpdateInProgress()) {
+				// setContentView(R.layout.site_update_in_progress_details);
+				startViewUpdater();
+			} else {
+				updateView();
+			}
 
-        }
-        else {    
-            AlertDialog.Builder diag =  new AlertDialog.Builder(this);
-        	diag.setMessage("Failed to get site data!");
-        	diag.setPositiveButton(getString(R.string.retry_update), new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-            		Intent i = new Intent(Constants.INTENT_ACTION_LAUNCH_SITE_UPDATE);
-            		i.putExtra(Constants.INTENT_EXTRA_SITE_UPDATE, selectedSiteIndex);
-            		startActivity(i); 
-               }
-           });
-        	diag.setNegativeButton(getString(R.string.cancel_update),  new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-            		Intent i = new Intent(Constants.INTENT_ACTION_LAUNCH_SITE_UPDATER);
-            		startActivity(i); 
-               }
-           });
-        	diag.show();
-        }
-    }
+		} else {
+			AlertDialog.Builder diag = new AlertDialog.Builder(this);
+			diag.setMessage("Failed to get site data!");
+			diag.setPositiveButton(getString(R.string.retry_update),
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							Intent i = new Intent(
+									Constants.INTENT_ACTION_LAUNCH_SITE_UPDATE);
+							i.putExtra(Constants.INTENT_EXTRA_SITE_UPDATE,
+									sSelectedSiteIndex);
+							startActivity(i);
+						}
+					});
+			diag.setNegativeButton(getString(R.string.cancel_update),
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							Intent i = new Intent(
+									Constants.INTENT_ACTION_LAUNCH_SITE_UPDATER);
+							startActivity(i);
+						}
+					});
+			diag.show();
+		}
+	}
+
 	@Override
 	protected void onStop() {
 		// TODO Auto-generated method stub
 		super.onStop();
 	}
 
-//	private ServiceConnection mConnection = new ServiceConnection() {
-//	    public void onServiceConnected(ComponentName className, IBinder service) {
-//	        // This is called when the connection with the service has been
-//	        // established, giving us the service object we can use to
-//	        // interact with the service.  Because we have bound to a explicit
-//	        // service that we know is running in our own process, we can
-//	        // cast its IBinder to a concrete class and directly access it.
-//	        mUpdaterService = ((SiteUpdaterService.LocalBinder)service).getService();
-//
-//	        if (mUpdaterService != null) {
-//	        	Log.d(Constants.LOG_TAG,"we have a service!");
-//	        }
-//	        // Tell the user about this for our demo.
-////	        Toast.makeText(mBoundService, "Service Connected",
-////	                Toast.LENGTH_SHORT).show();
-//	    }
-//
-//	    public void onServiceDisconnected(ComponentName className) {
-//	        // This is called when the connection with the service has been
-//	        // unexpectedly disconnected -- that is, its process crashed.
-//	        // Because it is running in our same process, we should never
-//	        // see this happen.
-//	        mUpdaterService = null;
-////	        Toast.makeText(Binding.this, "Serivce Disconnected",
-////	                Toast.LENGTH_SHORT).show();
-//	    }
-//	};
-//	private boolean mIsBound;
-//
-//	void doBindService() {
-//	    // Establish a connection with the service.  We use an explicit
-//	    // class name because we want a specific service implementation that
-//	    // we know will be running in our own process (and thus won't be
-//	    // supporting component replacement by other applications).
-//	    bindService(new Intent(this,
-//	    		SiteUpdaterService.class), mConnection, Context.BIND_AUTO_CREATE);
-//	    mIsBound = true;
-//	}
-//
-//	void doUnbindService() {
-//	    if (mIsBound) {
-//	        // Detach our existing connection.
-//	        unbindService(mConnection);
-//	        mIsBound = false;
-//	    }
-//	}
-//
-//	@Override
-//	protected void onDestroy() {
-//	    super.onDestroy();
-//	    doUnbindService();
-//	}
-	
+	// private ServiceConnection mConnection = new ServiceConnection() {
+	// public void onServiceConnected(ComponentName className, IBinder service)
+	// {
+	// // This is called when the connection with the service has been
+	// // established, giving us the service object we can use to
+	// // interact with the service. Because we have bound to a explicit
+	// // service that we know is running in our own process, we can
+	// // cast its IBinder to a concrete class and directly access it.
+	// mUpdaterService = ((SiteUpdaterService.LocalBinder)service).getService();
+	//
+	// if (mUpdaterService != null) {
+	// Log.d(Constants.LOG_TAG,"we have a service!");
+	// }
+	// // Tell the user about this for our demo.
+	// // Toast.makeText(mBoundService, "Service Connected",
+	// // Toast.LENGTH_SHORT).show();
+	// }
+	//
+	// public void onServiceDisconnected(ComponentName className) {
+	// // This is called when the connection with the service has been
+	// // unexpectedly disconnected -- that is, its process crashed.
+	// // Because it is running in our same process, we should never
+	// // see this happen.
+	// mUpdaterService = null;
+	// // Toast.makeText(Binding.this, "Serivce Disconnected",
+	// // Toast.LENGTH_SHORT).show();
+	// }
+	// };
+	// private boolean mIsBound;
+	//
+	// void doBindService() {
+	// // Establish a connection with the service. We use an explicit
+	// // class name because we want a specific service implementation that
+	// // we know will be running in our own process (and thus won't be
+	// // supporting component replacement by other applications).
+	// bindService(new Intent(this,
+	// SiteUpdaterService.class), mConnection, Context.BIND_AUTO_CREATE);
+	// mIsBound = true;
+	// }
+	//
+	// void doUnbindService() {
+	// if (mIsBound) {
+	// // Detach our existing connection.
+	// unbindService(mConnection);
+	// mIsBound = false;
+	// }
+	// }
+	//
+	// @Override
+	// protected void onDestroy() {
+	// super.onDestroy();
+	// doUnbindService();
+	// }
+
 }
