@@ -76,7 +76,7 @@ public class SiteUpdateData extends SiteData {
 		super();
 	}
 	/**
-	 * 
+	 * Constructs the instance from a file hosted at some URL. 
 	 * @param urlString
 	 * @param site
 	 * @throws IOException

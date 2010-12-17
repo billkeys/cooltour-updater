@@ -49,16 +49,17 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 /**
- * This activity will act as a controller for managing a site update and will be
- * invoked by a user selecting a site from the site list. Specific site actions
- * will be controlled from this activity, and the available actions will depend
- * on the sites state. <br>
- * 1)The site is up-to-date - Display site info (i.e. version) 2)The site is new
- * or downlevel - Display an Install/Update button to begin the update/ to
- * start, cancel, pause and update. 3)Update in progress - Display a progress
- * bar, and a cancel button 4)Update in progress (paused) - Display a progress
- * bar, and a resume button 5)Update Complete - Display update info, i.e. total
- * time. 6)Update Failed - Display error message, and a restart button
+ * This activity retrieves and presents the site update details. It will be
+ * invoked when a user selects a site from the site list. Specific site actions
+ * will be handled by this activity, and the available actions will depend
+ * on the update's state as follows: <br>
+ * 1)The site is up-to-date - Display site info (i.e. version) <br>
+ * 2)The site is new or downlevel - Display a 'start' button to begin 
+ * the update.<br>
+ * 3)Update in progress - Display a progress bar, and pause/cancel buttons <br>
+ * 4)Update in progress (paused) - Display a progress bar, and a resume button <br>
+ * 5)Update Complete - Display update info, i.e. total time. <br>
+ * 6)Update Failed - Display error message, and a restart button
  * 
  * @author Brendon Drew (b.j.drew@gmail.com)
  * 
@@ -112,14 +113,16 @@ public class SiteUpdateDetails extends Activity {
 				"SiteUpdateDetails getSiteUpdateData() incoming site:"
 						+ site.toString());
 		SiteUpdateData su = null;
+		//Get it from the SiteUpdateManager if it has an instance
 		if (SiteUpdateManager.getInstance(this).containsUpdate(site.getName())) {
 			su = SiteUpdateManager.getInstance(this)
 					.getUpdateThread(site.getName()).getUpdateData();
 		} else {
+			//Build the URL
 			String siteUpdateProperties = Constants.UPDATE_SERVER
 					+ site.getName() + "/" + site.getNewVersion() + "/"
 					+ site.getName() + Constants.UPDATE_FILE_EXT;
-
+			//Build the SiteUpdateData instance from the remote file.
 			try {
 				su = new SiteUpdateData(siteUpdateProperties, site);
 			} catch (IOException e) {
@@ -130,18 +133,17 @@ public class SiteUpdateDetails extends Activity {
 	}
 
 	/**
-	 * Invoked when pressing the start
+	 * Called when the user presses the start/pause button which doubles
+	 * as a toggle between running and not running.
 	 * 
 	 * @param v
 	 */
 	public void toggleRun(View v) {
 		SiteUpdateManager mgr = SiteUpdateManager.getInstance();
+		//Get the thread.  This will create the thread instance if it
+		//did not previously exist.
 		SiteUpdateThread uThread = mgr.getUpdateThread(sUpdate, this);
-		/*
-		 * if (mUpdaterService != null) { Log.d(Constants.LOG_TAG,
-		 * "we have the service!"); } else Log.d(Constants.LOG_TAG,
-		 * "no service!");
-		 */
+		//Check state, and act accordingly.
 		if (!uThread.isAlive()) {
 			Log.v(Constants.LOG_TAG, " starting update " + sUpdate.getName()
 					+ "");
@@ -151,24 +153,25 @@ public class SiteUpdateDetails extends Activity {
 					+ "");
 			uThread.interrupt();
 		}
+		//Start the thread that monitors the thread and updates the view.
 		startViewUpdater();
 	}
 
 	/**
-	 * 
+	 * Called when the user presses the cancel button
 	 * @param v
 	 */
 	public void cancelUpdate(View v) {
 		Log.v(Constants.LOG_TAG, " cancelling update " + sUpdate.getName() + "");
 		SiteUpdateThread upd = SiteUpdateManager.getInstance().getUpdateThread(
 				sUpdate, this);
-
+		//Set the cancel flag before interrupting so some cleanup can take place.
 		upd.setCancel(true);
 		upd.interrupt();
 	}
 
 	/**
-	 * 
+	 * Start the thread that monitors the update.
 	 */
 	private void startViewUpdater() {
 		mViewThread = new ViewThread();
@@ -285,7 +288,7 @@ public class SiteUpdateDetails extends Activity {
 	}
 
 	/**
-	 * 
+	 * A simple handler to invoke the view update.
 	 */
 	private Handler handler = new Handler() {
 		@Override
@@ -295,7 +298,7 @@ public class SiteUpdateDetails extends Activity {
 	};
 
 	/**
-     * 
+     * Called when the user presses the menu button
      */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -304,7 +307,9 @@ public class SiteUpdateDetails extends Activity {
 		menu.add(0, ABOUT_ID, 0, R.string.menu_about);
 		return true;
 	}
-
+	/**
+	 * Called when the user selects a menu item.
+	 */
 	@Override
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 		Log.v(Constants.LOG_TAG, "menu item selected:" + featureId);
@@ -320,7 +325,7 @@ public class SiteUpdateDetails extends Activity {
 		}
 		return true;
 	}
-
+	
 	@Override
 	protected void onPause() {
 		// TODO Auto-generated method stub
@@ -333,7 +338,11 @@ public class SiteUpdateDetails extends Activity {
 		super.onRestart();
 		Log.d(Constants.LOG_TAG, "SiteUpdateDetails onRestart()");
 	}
-
+	/**
+	 * Always called when starting or restarting the activity.
+	 * So this is where we put the logic to retrieve the site
+	 * details
+	 */
 	@Override
 	protected void onResume() {
 		Log.d(Constants.LOG_TAG, "SiteUpdateDetails onResume()");
@@ -341,16 +350,18 @@ public class SiteUpdateDetails extends Activity {
 		super.onResume();
 		SiteData selectedSite = null;
 		Intent i = getIntent();
+		// The intent must include extras which will provide some reference to the site.
 		Bundle extras = i.getExtras();
-		// Integer selectedSiteIndex;
+		//If an index was given, get the site at that location in the site list.
 		if (extras != null
-				&& extras.get(Constants.INTENT_EXTRA_SITE_UPDATE) != null) {
+				&& extras.get(Constants.INTENT_EXTRA_SITE_UPDATE_INDEX) != null) {
 			Log.v(Constants.LOG_TAG, "extra="
-					+ Constants.INTENT_EXTRA_SITE_UPDATE);
+					+ Constants.INTENT_EXTRA_SITE_UPDATE_INDEX);
 			sSelectedSiteIndex = (Integer) extras
-					.get(Constants.INTENT_EXTRA_SITE_UPDATE);
+					.get(Constants.INTENT_EXTRA_SITE_UPDATE_INDEX);
 			selectedSite = SiteList.mSiteList.get(sSelectedSiteIndex);
 			sUpdate = getSiteUpdateData(selectedSite);
+		//If a name was given, retrieve the site data from the manager
 		} else if (extras != null
 				&& extras.get(Constants.INTENT_EXTRA_SITE_UPDATE_NAME) != null) {
 			Log.v(Constants.LOG_TAG, "extra="
@@ -362,43 +373,50 @@ public class SiteUpdateDetails extends Activity {
 		} else {
 			Log.e(Constants.LOG_TAG, "No reference to an update!");
 		}
-
+		//Ensure we have a valid object
 		if (sUpdate != null) {
 			Log.d(Constants.LOG_TAG,
 					"SiteUpdateDetails displaying:" + sUpdate.toString());
 			startViewUpdater();
 			if (sUpdate.isUpdateInProgress()) {
-				// setContentView(R.layout.site_update_in_progress_details);
+				// if its running, start the view thread
 				startViewUpdater();
 			} else {
+				//Otherwise simply display its state as it is now.
 				updateView();
 			}
-
 		} else {
-			AlertDialog.Builder diag = new AlertDialog.Builder(this);
-			diag.setMessage("Failed to get site data!");
-			diag.setPositiveButton(getString(R.string.retry_update),
-					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int id) {
-							Intent i = new Intent(
-									Constants.INTENT_ACTION_LAUNCH_SITE_UPDATE);
-							i.putExtra(Constants.INTENT_EXTRA_SITE_UPDATE,
-									sSelectedSiteIndex);
-							startActivity(i);
-						}
-					});
-			diag.setNegativeButton(getString(R.string.cancel_update),
-					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int id) {
-							Intent i = new Intent(
-									Constants.INTENT_ACTION_LAUNCH_SITE_UPDATER);
-							startActivity(i);
-						}
-					});
-			diag.show();
+			alertUserOnFail();
 		}
 	}
-
+	/**
+	 * Posts a diaglog offering retry and cancel options.
+	 */
+	private void alertUserOnFail() {
+		AlertDialog.Builder diag = new AlertDialog.Builder(this);
+		diag.setMessage("Failed to get site data!");
+		//Retry launches this activity again.
+		diag.setPositiveButton(getString(R.string.retry_update),
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						Intent i = new Intent(
+								Constants.INTENT_ACTION_LAUNCH_SITE_UPDATE);
+						i.putExtra(Constants.INTENT_EXTRA_SITE_UPDATE_INDEX,
+								sSelectedSiteIndex);
+						startActivity(i);
+					}
+				});
+		//Cancel goes back to the list.
+		diag.setNegativeButton(getString(R.string.cancel_update),
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						Intent i = new Intent(
+								Constants.INTENT_ACTION_LAUNCH_SITE_UPDATER);
+						startActivity(i);
+					}
+				});
+		diag.show();
+	}
 	@Override
 	protected void onStop() {
 		// TODO Auto-generated method stub
