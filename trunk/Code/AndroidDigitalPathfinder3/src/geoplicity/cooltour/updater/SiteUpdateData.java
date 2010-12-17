@@ -96,6 +96,12 @@ public class SiteUpdateData extends SiteData {
 		setName(site.getName());
 		setVersion(site.getVersion());
 	}
+	public String getChecksum(){
+		return new String(getProperty(KEY_CHECKSUM));
+	}
+	public void setChecksum(String checksum){
+		setProperty(KEY_CHECKSUM, ""+checksum);
+	}
 	public long getBlockSize() {
 		return new Long(getProperty(KEY_BLOCK_SIZE));
 	}
