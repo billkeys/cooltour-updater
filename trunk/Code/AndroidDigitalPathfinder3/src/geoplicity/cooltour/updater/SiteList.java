@@ -94,16 +94,15 @@ public class SiteList extends ListActivity {
 	}
 
 	/**
-	 * Get the full list of sites.
-	 * 
+	 * Get the full list of sites, both local and remote.
 	 * @return
 	 */
 	public ArrayList<SiteData> getSites() {
 		Log.d(Constants.LOG_TAG, "SiteList getSites()");
 		mSiteList = new ArrayList<SiteData>();
 		Sites siteList = new Sites();
+		//First get the local site list.
 		try {
-
 			siteList.load(new FileInputStream(Constants.SDCARD_ROOT
 					+ Property.getProperty(Constants.PROPERTY_APP_ROOT_DIR)
 					+ "/" + Constants.DEFAULT_SITE_PROPERTIES));
@@ -113,11 +112,11 @@ public class SiteList extends ListActivity {
 			// Log.d(Constants.LOG_TAG,"app root:")+
 		}
 		Log.d(Constants.LOG_TAG, siteList.toString());
+		//Now merge the local list with the remote site list
 		try {
 			// Sites remoteSites = ;
 			siteList.merge(new Sites(Constants.UPDATE_SERVER
 					+ Constants.UPDATE_SITES_FILE));
-			// mSiteList = remoteSites.getSites();
 		} catch (IOException e) {
 			Log.e(Constants.LOG_TAG, "Failed to get sites list from "
 					+ Constants.UPDATE_SERVER, e);
@@ -148,6 +147,11 @@ public class SiteList extends ListActivity {
 	}
 
 	/**
+	 * Called when an item is the list is selected.  In this case we
+	 * want to launch the SiteUpdateDetails activity.  We add the site
+	 * index to the intent so that SiteUpdateDetails can retrieve the
+	 * site data.
+	 * 
 	 * @param l
 	 * @param v
 	 * @param position
@@ -161,7 +165,7 @@ public class SiteList extends ListActivity {
 		Log.v(Constants.LOG_TAG,
 				"position " + position + " selected, " + s.toString());
 		Intent i = new Intent(Constants.INTENT_ACTION_LAUNCH_SITE_UPDATE);
-		i.putExtra(Constants.INTENT_EXTRA_SITE_UPDATE, position);
+		i.putExtra(Constants.INTENT_EXTRA_SITE_UPDATE_INDEX, position);
 		startActivity(i);
 	}
 
@@ -178,43 +182,51 @@ public class SiteList extends ListActivity {
 		super.onRestart();
 		Log.d(Constants.LOG_TAG, "SiteList onRestart()");
 	}
-
+	/**
+	 * Always called when starting or restart an activity.
+	 */
 	@Override
 	protected void onResume() {
-		// TODO Auto-generated method stub
 		super.onResume();
 		Log.d(Constants.LOG_TAG, "SiteList onResume()");
 		refreshList();
-
 		if (mSiteList == null || mSiteList.isEmpty()) {
-			AlertDialog.Builder diag = new AlertDialog.Builder(this);
-			diag.setMessage("Failed to connect to server!");
-			diag.setPositiveButton(getString(R.string.retry_update),
-					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int id) {
-							Intent i = new Intent(
-									Constants.INTENT_ACTION_LAUNCH_SITE_UPDATER);
-							startActivity(i);
-						}
-					});
-			diag.setNegativeButton(getString(R.string.cancel_update),
-					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int id) {
-							Intent i = new Intent(
-									Constants.INTENT_ACTION_MAIN_UI);
-							startActivity(i);
-						}
-					});
-			diag.show();
+			alertUserOnFail();
 		} else {
 			mSiteListAdapter = new SiteListAdapter<SiteData>(this,
 					R.layout.site_list_row, mSiteList);
 			setListAdapter(mSiteListAdapter);
-
 		}
 	}
-
 	/**
+	 * Posts a dialog alerting the user that the site list
+	 * could not be generated. 
+	 */
+	private void alertUserOnFail() {
+		AlertDialog.Builder diag = new AlertDialog.Builder(this);
+		diag.setMessage("Failed to connect to server!");
+		//rety will attempt to reload this activity
+		diag.setPositiveButton(getString(R.string.retry_update),
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						Intent i = new Intent(
+								Constants.INTENT_ACTION_LAUNCH_SITE_UPDATER);
+						startActivity(i);
+					}
+				});
+		//Cancel should return the user to the MainUI
+		diag.setNegativeButton(getString(R.string.cancel_update),
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						Intent i = new Intent(
+								Constants.INTENT_ACTION_MAIN_UI);
+						startActivity(i);
+					}
+				});
+		diag.show();	
+	}
+	/**
+	 * Called when the user presses the menu button
 	 * @param menu
 	 */
 	@Override
@@ -226,6 +238,7 @@ public class SiteList extends ListActivity {
 	}
 
 	/**
+	 * Called when the user selects a menu item.
 	 * @param featureId
 	 * @param item
 	 */
