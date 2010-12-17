@@ -1,3 +1,29 @@
+/**
+ * Copyright (c) Contributors, http://geoplicity.org/
+ * See CONTRIBUTORS.TXT for a full list of copyright holders.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Geoplicity Project nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE DEVELOPERS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 package geoplicity.cooltour.updater;
 
 import geoplicity.cooltour.sites.SiteData;
@@ -20,21 +46,51 @@ public class SiteUpdateData extends SiteData {
 	public static final String KEY_CHECKSUM = "checksum";
 	public static final String KEY_FILE_FORMAT = "file_format";
 	public static final String KEY_FILE_SIZE = "file_size";
-	int currentBlock = 1;
-	int currentMode = 0;
-	boolean updateInProgress;
-
-	boolean hasError;
-	String statusMessage;
+	/**
+	 * The current block to download
+	 */
+	int mCurrentBlock = 1;
+	/**
+	 * The current step
+	 */
+	int mCurrentMode = 0;
+	/**
+	 * Set true to indicate that the update is in progress
+	 * Note: this means that the thread has started once, 
+	 * but not necessarily that the thread is currently 
+	 * running.
+	 */
+	boolean mUpdateInProgress;
+	/**
+	 * Set true if an error had occurred.
+	 */
+	boolean mHasError;
+	/**
+	 * A string that represents the updates progress.
+	 */
+	String mStatusMessage;
+	/**
+	 * 
+	 */
 	public SiteUpdateData() {
 		super();
 	}
+	/**
+	 * 
+	 * @param urlString
+	 * @param site
+	 * @throws IOException
+	 */
 	public SiteUpdateData(String urlString, SiteData site) throws IOException {
 		super(urlString);
-		this.updateAvailable = site.isUpdateAvailable();
-		this.updateStarted = site.hasUpdateStarted();
-		this.newSite = site.isNewSite();
+		this.mUpdateAvailable = site.isUpdateAvailable();
+		this.mUpdateStarted = site.hasUpdateStarted();
+		this.mNewSite = site.isNewSite();
 	}
+	/**
+	 * 
+	 * @param site
+	 */
 	public SiteUpdateData(SiteData site) {
 		super();
 		setName(site.getName());
@@ -65,51 +121,54 @@ public class SiteUpdateData extends SiteData {
 		setProperty(KEY_FILE_SIZE, fileSize+"");
 	}
 	public boolean isUpdateInProgress() {
-		return updateInProgress;
+		return mUpdateInProgress;
 	}
 	public void setUpdateInProgress(boolean updateStarted) {
-		this.updateInProgress = updateStarted;
+		this.mUpdateInProgress = updateStarted;
 	}
 	public int getCurrentBlock() {
-		return currentBlock;
+		return mCurrentBlock;
 	}
 	public void setCurrentBlock(int blocksDownloaded) {
-		this.currentBlock = blocksDownloaded;
+		this.mCurrentBlock = blocksDownloaded;
 	}
 	public void incrementCurrentBlock() {
-		this.currentBlock++;
+		this.mCurrentBlock++;
 	}
 	public String getStatusMessage() {
-		return statusMessage;
+		return mStatusMessage;
 	}
 	public void setStatusMessage(String resultMessage) {
-		this.statusMessage = resultMessage;
+		this.mStatusMessage = resultMessage;
 	}
 	public int getCurrentMode() {
-		return currentMode;
+		return mCurrentMode;
 	}
 	public void setCurrentMode(int currentMode) {
-		this.currentMode = currentMode;
+		this.mCurrentMode = currentMode;
 	}
 	public boolean hasError() {
-		return hasError;
+		return mHasError;
 	}
 	public void setHasError(boolean hasError) {
-		this.hasError = hasError;
+		this.mHasError = hasError;
 	}
+	/**
+	 * Clears update status
+	 */
 	public void reset() {
-		currentBlock = 1;
-		currentMode = 0;
-		updateInProgress = false;
-		updateStarted = false;
+		mCurrentBlock = 1;
+		mCurrentMode = 0;
+		mUpdateInProgress = false;
+		mUpdateStarted = false;
 		
 	}
 	public String toString() {
 		return "[ SiteUpdateData :: "+super.toString() +
-		", currentBlock="+currentBlock+", " +
-		"currentMode="+currentMode+"," +
-		"updateInProgress="+updateInProgress+", " +
-		"hasError="+hasError+", " +
-		"statusMessage="+statusMessage+" ]";
+		", currentBlock="+mCurrentBlock+", " +
+		"currentMode="+mCurrentMode+"," +
+		"updateInProgress="+mUpdateInProgress+", " +
+		"hasError="+mHasError+", " +
+		"statusMessage="+mStatusMessage+" ]";
 	}
 }
