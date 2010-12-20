@@ -43,7 +43,7 @@ public class Constants {
 	public static final String INTENT_ACTION_LAUNCH_SITE_UPDATE = "geoplicity.cooltour.LAUNCH_SITE_UPDATE";
 
 	// intent extras
-	public static final String INTENT_EXTRA_SITE_UPDATE = "geoplicity.cooltour.SITE_UPDATE";
+	public static final String INTENT_EXTRA_SITE_UPDATE_INDEX = "geoplicity.cooltour.SITE_UPDATE";
 	public static final String INTENT_EXTRA_SITE_UPDATE_NAME = "geoplicity.cooltour.SITE_UPDATE_NAME";
 	public static final String INTENT_EXTRA_SITE_RUNNING_UPDATE = "geoplicity.cooltour.SITE_RUNNING_UPDATE";
 
@@ -70,9 +70,8 @@ public class Constants {
 	// Note: In order to use a web server on the same system in which the
 	// emulator is running, you have to use your workstation's IP instead of
 	// "localhost".
-	public static final String UPDATE_SERVER = "http://192.168.1.102/";
-	// public static final String UPDATE_SERVER =
-	// "http://reachforthestarsmcc.com/sdodge/files/sites/";
+	public static final String UPDATE_SERVER = "http://9.56.71.156/";
+	//public static final String UPDATE_SERVER = "http://reachforthestarsmcc.com/sdodge/files/sites/";
 	public static final String UPDATE_FILE_EXT = ".txt";
 	public static final String UPDATE_SITES_FILE = "sites" + UPDATE_FILE_EXT;
 	public static final String UPDATE_TEMP_DIR = "tmp/";
